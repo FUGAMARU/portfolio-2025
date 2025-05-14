@@ -4,5 +4,6 @@ html,
 body {
   font-family: "IBM Plex Sans JP", sans-serif;
   color: var(--color-general-white);
-  background-color: var(--color-use-case-background);
+  background-image: url("/background.jpg");
+  background-size: cover;
 }
