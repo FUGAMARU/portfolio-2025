@@ -1,0 +1,8 @@
+@import url("./variables.css");
+
+html,
+body {
+  font-family: "IBM Plex Sans JP", sans-serif;
+  color: var(--color-general-white);
+  background-color: var(--color-use-case-background);
+}

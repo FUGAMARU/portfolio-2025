@@ -1,0 +1,13 @@
+{
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "css.validate": false,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.addMissingImports": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "prettier.configPath": ".prettierrc.js",
+  "cSpell.ignoreWords": ["destyle"]
+}
