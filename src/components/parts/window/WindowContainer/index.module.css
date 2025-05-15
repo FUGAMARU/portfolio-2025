@@ -1,0 +1,25 @@
+.windowContainer {
+  position: relative;
+  padding: 32px;
+  background-color: var(--color-use-case-window-background);
+  border: solid 1px var(--color-use-case-window-border);
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+
+  &.FullScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  > .control {
+    position: absolute;
+    top: 16px;
+    left: 22px;
+  }
+}

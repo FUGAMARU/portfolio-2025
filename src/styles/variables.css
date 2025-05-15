@@ -2,6 +2,8 @@
   /* 色 */
   --color-general-white: #fff;
   --color-use-case-background: #010101;
+  --color-use-case-window-background: rgb(64 64 64 / 50%);
+  --color-use-case-window-border: #484848;
   --color-use-case-window-control-close: #ff3c2f;
   --color-use-case-window-control-minimize: #ffcc01;
   --color-use-case-window-control-maximize: #35c759;
