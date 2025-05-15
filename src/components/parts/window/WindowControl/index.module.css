@@ -1,0 +1,22 @@
+.windowControl {
+  display: flex;
+  gap: 10px;
+
+  > .button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+
+    &.Close {
+      background-color: var(--color-use-case-window-control-close);
+    }
+
+    &.Minimize {
+      background-color: var(--color-use-case-window-control-minimize);
+    }
+
+    &.Maximize {
+      background-color: var(--color-use-case-window-control-maximize);
+    }
+  }
+}
