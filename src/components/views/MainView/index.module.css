@@ -2,10 +2,16 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-}
 
-.basicInfo {
-  position: absolute;
-  bottom: 48px;
-  left: 48px;
+  > .basicinfo {
+    position: absolute;
+    bottom: 48px;
+    left: 48px;
+  }
+
+  > .works {
+    position: absolute;
+    right: 64px;
+    bottom: 64px;
+  }
 }
