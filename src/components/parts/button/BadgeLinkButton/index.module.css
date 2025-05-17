@@ -1,0 +1,10 @@
+.badgeLinkButton {
+  display: grid;
+  place-items: center;
+  width: fit-content;
+  height: 28px;
+  padding: 0 12px;
+  background: var(--gradient-use-case-badge);
+  border: solid 1px var(--color-use-case-badge-border);
+  border-radius: 8px;
+}
