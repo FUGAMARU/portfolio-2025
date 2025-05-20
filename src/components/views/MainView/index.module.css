@@ -3,6 +3,13 @@
   width: 100vw;
   height: 100vh;
 
+  > .star {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
   > .basicinfo {
     position: absolute;
     bottom: 48px;
