@@ -3,6 +3,12 @@
   width: 100vw;
   height: 100vh;
 
+  > .status {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+  }
+
   > .star {
     position: absolute;
     top: 16px;

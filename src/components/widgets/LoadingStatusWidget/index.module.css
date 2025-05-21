@@ -1,0 +1,20 @@
+.loadingStatusWidget {
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+
+  > .text {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.625rem;
+    color: var(--color-general-pale-green);
+    text-box: trim-both cap alphabetic;
+  }
+
+  > .icon {
+    display: inline-flex;
+    width: 0.625rem;
+    height: 0.625rem;
+    line-height: 1;
+    stroke: var(--color-general-pale-green);
+  }
+}
