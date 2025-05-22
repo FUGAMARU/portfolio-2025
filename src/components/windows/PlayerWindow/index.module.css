@@ -1,0 +1,101 @@
+.playerWindow {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--color-use-case-window-background);
+  border: solid 1px var(--color-use-case-window-border);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(0.25rem);
+
+  > .artwork {
+    width: 4rem;
+    height: 4rem;
+    padding: 0.125rem;
+    background-color: rgb(254 240 2 / 80%); /* TODO: 仮置きの値 */
+    border-radius: 0.5rem;
+
+    > .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
+  }
+
+  > .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 15.625rem;
+
+    > .texts {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding-left: 0.5rem;
+
+      > .title {
+        font-size: 1rem;
+        font-weight: 500;
+      }
+
+      > .artists {
+        font-size: 0.75rem;
+        color: var(--color-general-gray);
+      }
+    }
+
+    > .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.125rem;
+
+      > .actions {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+
+        > .item {
+          display: inline-flex;
+          width: 1.125rem;
+          height: 1.125rem;
+          line-height: 1;
+          fill: var(--color-general-white);
+
+          &.Pause {
+            width: 1.375rem;
+            height: 1.375rem;
+            fill: none;
+            stroke: var(--color-general-white);
+          }
+        }
+      }
+
+      > .seekbar {
+        position: relative;
+        width: 100%;
+        height: 0.125rem;
+        overflow: hidden;
+        background-color: var(--color-general-gray);
+        border-radius: 0.5rem;
+
+        > .current {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          background-color: var(--color-general-white);
+        }
+      }
+    }
+  }
+}
+
+.maxOneLine {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}

@@ -1,6 +1,7 @@
 :root {
   /* 色 */
   --color-general-white: #fff;
+  --color-general-gray: #c5c5c5;
   --color-general-rich-yellow: #ffebd0;
   --color-general-pale-green: #a3eecc;
   --color-use-case-background: #010101;
