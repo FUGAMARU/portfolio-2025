@@ -16,12 +16,6 @@
     transform: translateX(-50%);
   }
 
-  > .basicinfo {
-    position: absolute;
-    bottom: 48px;
-    left: 48px;
-  }
-
   > .works {
     position: absolute;
     right: 64px;

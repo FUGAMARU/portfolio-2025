@@ -1,6 +1,7 @@
 .basicInfoWindow {
   display: flex;
   flex-direction: column;
+  width: fit-content;
 
   > .name {
     font-family: Urbanist, sans-serif;

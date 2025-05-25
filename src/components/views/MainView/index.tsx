@@ -17,14 +17,13 @@ export const MainView = () => {
         <StarWidget />
       </div>
 
-      <div className={styles.basicinfo}>
-        <BasicInfoWindow />
-      </div>
-
       <div className={styles.works}>
         <WorksWidget />
       </div>
 
+      <BasicInfoWindow bottom={48} left={48} />
+
+      {/** プレイヤーの方が上のレイヤーにある */}
       <div className={styles.player}>
         <PlayerWindow />
       </div>
