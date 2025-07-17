@@ -1,5 +1,8 @@
+import { useState } from "react"
+
 import { WorkButton } from "@/components/parts/button/WorkButton"
 import styles from "@/components/widgets/WorksWidget/index.module.css"
+import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
 
 const DUMMY_WORKS = [
   "https://placehold.jp/150x150.png",
@@ -11,9 +14,11 @@ const DUMMY_WORKS = [
 
 /** 制作物一覧表示用ウィジェット */
 export const WorksWidget = () => {
+  const [isWindowOpen, setIsWindowOpen] = useState(false) // TODO: 仮あて
+
   /** 作品ボタンを押下した時の処理 */
   const handleButtonClick = () => {
-    console.log("Button clicked")
+    setIsWindowOpen(true)
   }
 
   return (
@@ -23,6 +28,18 @@ export const WorksWidget = () => {
           <WorkButton onClick={handleButtonClick} src={src} />
         </div>
       ))}
+
+      <div className={styles.windows}>
+        {/* TODO: 仮あて */}
+        <WorkDetailWindow
+          isOpen={isWindowOpen}
+          left={100}
+          onClose={() => setIsWindowOpen(false)}
+          onMaximize={() => {}}
+          onMinimize={() => setIsWindowOpen(false)}
+          top={100}
+        />
+      </div>
     </div>
   )
 }

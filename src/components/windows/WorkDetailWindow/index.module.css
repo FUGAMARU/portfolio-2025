@@ -1,0 +1,6 @@
+/* TODO: 仮あて */
+.workDetailWindow {
+  display: flex;
+  flex-direction: column;
+  min-width: 400px; /* TODO: 絶対値で指定したくない */
+}

@@ -1,4 +1,5 @@
 .worksWidget {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -6,5 +7,16 @@
   > .item {
     width: 100px;
     aspect-ratio: 1;
+  }
+
+  > .windows {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
+  > .windows > * {
+    pointer-events: auto;
   }
 }

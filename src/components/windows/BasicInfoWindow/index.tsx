@@ -1,11 +1,13 @@
 import clsx from "clsx"
-import { useState, type ComponentProps } from "react"
+import { useState } from "react"
 
 import { BadgeLinkButton } from "@/components/parts/button/BadgeLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
 import { CakeIcon } from "@/components/windows/BasicInfoWindow/CakeIcon"
 import styles from "@/components/windows/BasicInfoWindow/index.module.css"
 import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
+
+import type { ComponentProps } from "react"
 
 /** Props */
 type Props = Pick<ComponentProps<typeof WindowContainer>, "left" | "bottom">

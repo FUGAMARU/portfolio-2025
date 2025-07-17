@@ -1,0 +1,24 @@
+.generalButton {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 12px;
+  background-color: var(--color-use-case-general-button-alpha-50);
+  border: solid 1px var(--color-use-case-general-button-color);
+  border-radius: 8px;
+
+  > .text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-general-rich-yellow);
+    text-box: trim-both cap alphabetic;
+  }
+
+  > .icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    line-height: 1;
+    stroke: var(--color-general-rich-yellow);
+  }
+}
