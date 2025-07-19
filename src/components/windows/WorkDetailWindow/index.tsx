@@ -24,7 +24,7 @@ type Props = {
     href: string
   }>
 } & Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
-  Pick<ComponentProps<typeof WindowContainer>, "left" | "top">
+  Pick<ComponentProps<typeof WindowContainer>, "left" | "top" | "onPositionChange">
 
 /** 作品詳細ウィンドウ */
 export const WorkDetailWindow = (windowContainerProps: Props) => {

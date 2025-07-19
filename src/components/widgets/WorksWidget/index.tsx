@@ -24,6 +24,10 @@ type WindowState = {
   left: number
   /** 上端位置 */
   top: number
+  /** 現在のX位置（ドラッグ移動後） */
+  currentX: number
+  /** 現在のY位置（ドラッグ移動後） */
+  currentY: number
 }
 
 /** ウィンドウアクションの型定義 */
@@ -55,6 +59,19 @@ type WindowAction =
         workId: string
       }
     }
+  | {
+      /** ウィンドウの位置を更新 */
+      type: "UPDATE_POSITION"
+      /** ペイロード */
+      payload: {
+        /** 作品ID */
+        workId: string
+        /** X位置 */
+        x: number
+        /** Y位置 */
+        y: number
+      }
+    }
 
 /** ウィンドウ状態のreducer */
 const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<WindowState> => {
@@ -70,18 +87,23 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
         return state
       }
 
-      // 新しいウィンドウの位置を決定（宣言的に）
+      // 新しいウィンドウの位置を決定（最新のウィンドウの現在位置を基準に）
       const isFirstWindow = state.length === 0
       const lastWindow = state[state.length - 1]
 
+      const newLeft = isFirstWindow
+        ? WINDOW_POSITION.INITIAL_LEFT
+        : lastWindow.currentX + WINDOW_POSITION.OFFSET_STEP
+      const newTop = isFirstWindow
+        ? WINDOW_POSITION.INITIAL_TOP
+        : lastWindow.currentY + WINDOW_POSITION.OFFSET_STEP
+
       const newWindow = {
         id: workId,
-        left: isFirstWindow
-          ? WINDOW_POSITION.INITIAL_LEFT
-          : lastWindow.left + WINDOW_POSITION.OFFSET_STEP,
-        top: isFirstWindow
-          ? WINDOW_POSITION.INITIAL_TOP
-          : lastWindow.top + WINDOW_POSITION.OFFSET_STEP
+        left: newLeft,
+        top: newTop,
+        currentX: newLeft,
+        currentY: newTop
       } satisfies WindowState
 
       return [...state, newWindow]
@@ -91,6 +113,13 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
     case "MINIMIZE_WINDOW": {
       const { workId } = action.payload
       return state.filter(window => window.id !== workId)
+    }
+
+    case "UPDATE_POSITION": {
+      const { workId, x, y } = action.payload
+      return state.map(window =>
+        window.id === workId ? { ...window, currentX: x, currentY: y } : window
+      )
     }
 
     default:
@@ -200,6 +229,19 @@ export const WorksWidget = () => {
     // TODO: 最大化の処理を実装
   }
 
+  /** ウィンドウの位置を更新する処理 */
+  const handlePositionChange = (
+    workId: string,
+    position: {
+      /** x */
+      x: number
+      /** y */
+      y: number
+    }
+  ) => {
+    dispatch({ type: "UPDATE_POSITION", payload: { workId, x: position.x, y: position.y } })
+  }
+
   return (
     <div className={styles.worksWidget}>
       {DUMMY_WORKS.map(work => (
@@ -224,6 +266,7 @@ export const WorksWidget = () => {
               onClose={() => handleWindowClose(workData.id)}
               onMaximize={handleWindowMaximize}
               onMinimize={() => handleWindowMinimize(workData.id)}
+              onPositionChange={position => handlePositionChange(workData.id, position)}
               previewImage={workData.previewImage}
               referenceLinks={workData.referenceLinks}
               tags={workData.tags}

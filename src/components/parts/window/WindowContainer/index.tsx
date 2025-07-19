@@ -17,6 +17,13 @@ type PositionProps = {
   right?: number
   /** bottom */
   bottom?: number
+  /** 位置変更時のコールバック */
+  onPositionChange?: (position: {
+    /** x */
+    x: number
+    /** y */
+    y: number
+  }) => void
 }
 
 /** WindowControlありの時のProps */
@@ -55,6 +62,7 @@ export const WindowContainer = ({
   left,
   right,
   bottom,
+  onPositionChange: handlePositionChange,
   ...windowControlProps
 }: Props) => {
   const [isInitialized, setIsInitialized] = useState(false)
@@ -122,6 +130,9 @@ export const WindowContainer = ({
       disableDragging={!isInitialized}
       minHeight={initialSize.height ?? "auto"}
       minWidth={initialSize.width ?? "auto"}
+      onDrag={(_, data) => {
+        handlePositionChange?.({ x: data.x, y: data.y })
+      }}
       style={{
         visibility: isInitialized ? "visible" : "hidden"
       }}
