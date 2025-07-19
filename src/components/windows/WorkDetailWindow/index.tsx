@@ -8,8 +8,6 @@ import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 
 /** Props */
 type Props = {
-  /** 開いているかどうか */
-  isOpen: boolean
   /** プレビュー画像 */
   previewImage: string
   /** ロゴ画像 */
@@ -28,12 +26,8 @@ type Props = {
 } & Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
   Pick<ComponentProps<typeof WindowContainer>, "left" | "top">
 
-/** 作品詳細ウィンドウ TODO: 仮あて */
-export const WorkDetailWindow = ({ isOpen, ...windowContainerProps }: Props) => {
-  if (!isOpen) {
-    return null
-  }
-
+/** 作品詳細ウィンドウ */
+export const WorkDetailWindow = (windowContainerProps: Props) => {
   return (
     <WindowContainer hasWindowControl isFullScreen={false} {...windowContainerProps}>
       <div className={styles.workDetailWindow}>
