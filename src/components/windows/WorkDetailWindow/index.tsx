@@ -10,6 +10,21 @@ import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 type Props = {
   /** 開いているかどうか */
   isOpen: boolean
+  /** プレビュー画像 */
+  previewImage: string
+  /** ロゴ画像 */
+  logoImage: string
+  /** タグ一覧 */
+  tags: Array<string>
+  /** 説明文 */
+  description: string
+  /** 参考リンク一覧 */
+  referenceLinks: Array<{
+    /** テキスト */
+    text: string
+    /** 遷移先 */
+    href: string
+  }>
 } & Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
   Pick<ComponentProps<typeof WindowContainer>, "left" | "top">
 
@@ -22,8 +37,26 @@ export const WorkDetailWindow = ({ isOpen, ...windowContainerProps }: Props) => 
   return (
     <WindowContainer hasWindowControl isFullScreen={false} {...windowContainerProps}>
       <div className={styles.workDetailWindow}>
-        <p>作品情報をこのウィンドウで表示します</p>
-        <GeneralButton href="/" text="作品詳細ページへ" />
+        <img className={styles.preview} src={windowContainerProps.previewImage} width={500} />
+        <div className={styles.info}>
+          <img className={styles.logo} height={70} src={windowContainerProps.logoImage} />
+
+          <div className={styles.tags}>
+            {windowContainerProps.tags.map((tag, index) => (
+              <span key={index} className={styles.tag}>
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <p className={styles.description}>{windowContainerProps.description}</p>
+
+          <div className={styles.links}>
+            {windowContainerProps.referenceLinks.map((link, index) => (
+              <GeneralButton key={index} href={link.href} text={link.text} />
+            ))}
+          </div>
+        </div>
       </div>
     </WindowContainer>
   )

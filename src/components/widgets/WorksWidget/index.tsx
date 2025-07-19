@@ -32,11 +32,19 @@ export const WorksWidget = () => {
       <div className={styles.windows}>
         {/* TODO: 仮あて */}
         <WorkDetailWindow
+          description="これはサンプルプロジェクトの説明文です。プロジェクトの概要や使用技術、特徴などを記載します。これはサンプルプロジェクトの説明文です。プロジェクトの概要や使用技術、特徴などを記載します。これはサンプルプロジェクトの説明文です。プロジェクトの概要や使用技術、特徴などを記載します。これはサンプルプロジェクトの説明文です。プロジェクトの概要や使用技術、特徴などを記載します。"
           isOpen={isWindowOpen}
           left={100}
+          logoImage="https://placehold.jp/150x70.png"
           onClose={() => setIsWindowOpen(false)}
           onMaximize={() => {}}
           onMinimize={() => setIsWindowOpen(false)}
+          previewImage="https://placehold.jp/500x300.png"
+          referenceLinks={[
+            { text: "GitHub", href: "https://github.com/example/project" },
+            { text: "デモサイト", href: "https://example.com/demo" }
+          ]}
+          tags={["React", "TypeScript", "CSS Modules"]}
           top={100}
         />
       </div>
