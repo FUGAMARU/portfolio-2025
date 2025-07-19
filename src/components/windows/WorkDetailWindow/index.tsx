@@ -24,12 +24,21 @@ type Props = {
     href: string
   }>
 } & Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
-  Pick<ComponentProps<typeof WindowContainer>, "left" | "top" | "onPositionChange">
+  Pick<
+    ComponentProps<typeof WindowContainer>,
+    "left" | "top" | "onPositionChange" | "zIndex" | "onFocus"
+  >
 
 /** 作品詳細ウィンドウ */
-export const WorkDetailWindow = (windowContainerProps: Props) => {
+export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: Props) => {
   return (
-    <WindowContainer hasWindowControl isFullScreen={false} {...windowContainerProps}>
+    <WindowContainer
+      hasWindowControl
+      isFullScreen={false}
+      onFocus={onFocus}
+      zIndex={zIndex}
+      {...windowContainerProps}
+    >
       <div className={styles.workDetailWindow}>
         <img className={styles.preview} src={windowContainerProps.previewImage} width={500} />
         <div className={styles.info}>

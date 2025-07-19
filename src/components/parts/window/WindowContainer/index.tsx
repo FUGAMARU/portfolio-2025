@@ -45,6 +45,10 @@ type Props = (PropsWithWindowControl | PropsWithoutWindowControl) &
     children: ReactNode
     /** フルスクリーン表示するかどうか */
     isFullScreen: boolean
+    /** z-index */
+    zIndex?: number
+    /** ウィンドウがフォーカスされた時の処理 */
+    onFocus?: () => void
   }
 
 const DEFAULT_POSITION = {
@@ -62,6 +66,8 @@ export const WindowContainer = ({
   left,
   right,
   bottom,
+  zIndex,
+  onFocus,
   onPositionChange: handlePositionChange,
   ...windowControlProps
 }: Props) => {
@@ -134,12 +140,15 @@ export const WindowContainer = ({
         handlePositionChange?.({ x: data.x, y: data.y })
       }}
       style={{
-        visibility: isInitialized ? "visible" : "hidden"
+        visibility: isInitialized ? "visible" : "hidden",
+        zIndex: zIndex ?? "auto"
       }}
     >
       <div
         ref={windowContentRef}
         className={clsx(styles.windowContainer, isFullScreen && styles.FullScreen)}
+        onClick={onFocus}
+        onMouseDown={onFocus}
       >
         {windowControlProps.hasWindowControl === true && (
           <div className={styles.control}>

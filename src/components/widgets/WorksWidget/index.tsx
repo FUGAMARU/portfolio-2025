@@ -20,14 +20,12 @@ const WINDOW_POSITION = {
 type WindowState = {
   /** ウィンドウID */
   id: string
-  /** 左端位置 */
-  left: number
-  /** 上端位置 */
-  top: number
   /** 現在のX位置（ドラッグ移動後） */
   currentX: number
   /** 現在のY位置（ドラッグ移動後） */
   currentY: number
+  /** z-index（レイヤー順） */
+  zIndex: number
 }
 
 /** ウィンドウアクションの型定義 */
@@ -72,6 +70,15 @@ type WindowAction =
         y: number
       }
     }
+  | {
+      /** ウィンドウを最前面に移動 */
+      type: "BRING_TO_FRONT"
+      /** ペイロード */
+      payload: {
+        /** 作品ID */
+        workId: string
+      }
+    }
 
 /** ウィンドウ状態のreducer */
 const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<WindowState> => {
@@ -87,23 +94,27 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
         return state
       }
 
-      // 新しいウィンドウの位置を決定（最新のウィンドウの現在位置を基準に）
+      // 新しいウィンドウの位置を決定（一番上にあるウィンドウの現在位置を基準に）
       const isFirstWindow = state.length === 0
-      const lastWindow = state[state.length - 1]
+
+      // 最大のz-indexを取得
+      const maxZIndex = state.length === 0 ? 0 : Math.max(...state.map(w => w.zIndex))
+
+      // 一番上にあるウィンドウを取得
+      const topWindow = state.find(window => window.zIndex === maxZIndex)
 
       const newLeft = isFirstWindow
         ? WINDOW_POSITION.INITIAL_LEFT
-        : lastWindow.currentX + WINDOW_POSITION.OFFSET_STEP
+        : (topWindow?.currentX ?? WINDOW_POSITION.INITIAL_LEFT) + WINDOW_POSITION.OFFSET_STEP
       const newTop = isFirstWindow
         ? WINDOW_POSITION.INITIAL_TOP
-        : lastWindow.currentY + WINDOW_POSITION.OFFSET_STEP
+        : (topWindow?.currentY ?? WINDOW_POSITION.INITIAL_TOP) + WINDOW_POSITION.OFFSET_STEP
 
       const newWindow = {
         id: workId,
-        left: newLeft,
-        top: newTop,
         currentX: newLeft,
-        currentY: newTop
+        currentY: newTop,
+        zIndex: maxZIndex + 1
       } satisfies WindowState
 
       return [...state, newWindow]
@@ -119,6 +130,14 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
       const { workId, x, y } = action.payload
       return state.map(window =>
         window.id === workId ? { ...window, currentX: x, currentY: y } : window
+      )
+    }
+
+    case "BRING_TO_FRONT": {
+      const { workId } = action.payload
+      const maxZIndex = Math.max(...state.map(w => w.zIndex))
+      return state.map(window =>
+        window.id === workId ? { ...window, zIndex: maxZIndex + 1 } : window
       )
     }
 
@@ -242,6 +261,11 @@ export const WorksWidget = () => {
     dispatch({ type: "UPDATE_POSITION", payload: { workId, x: position.x, y: position.y } })
   }
 
+  /** ウィンドウを最前面に持ってくる処理 */
+  const handleWindowFocus = (workId: string) => {
+    dispatch({ type: "BRING_TO_FRONT", payload: { workId } })
+  }
+
   return (
     <div className={styles.worksWidget}>
       {DUMMY_WORKS.map(work => (
@@ -261,16 +285,18 @@ export const WorksWidget = () => {
             <WorkDetailWindow
               key={windowState.id}
               description={workData.description}
-              left={windowState.left}
+              left={windowState.currentX}
               logoImage={workData.logoImage}
               onClose={() => handleWindowClose(workData.id)}
+              onFocus={() => handleWindowFocus(workData.id)}
               onMaximize={handleWindowMaximize}
               onMinimize={() => handleWindowMinimize(workData.id)}
               onPositionChange={position => handlePositionChange(workData.id, position)}
               previewImage={workData.previewImage}
               referenceLinks={workData.referenceLinks}
               tags={workData.tags}
-              top={windowState.top}
+              top={windowState.currentY}
+              zIndex={windowState.zIndex}
             />
           )
         })}
