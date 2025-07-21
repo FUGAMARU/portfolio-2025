@@ -1,11 +1,12 @@
 import styles from "@/components/views/MainView/index.module.css"
+import { useDataFetch } from "@/components/views/MainView/useDataFetch"
+import { useWindowManager, WINDOW_POSITION } from "@/components/views/MainView/useWindowManager"
 import { LoadingStatusWidget } from "@/components/widgets/LoadingStatusWidget"
 import { StarWidget } from "@/components/widgets/StarWidget"
 import { WorksWidget } from "@/components/widgets/WorksWidget"
 import { BasicInfoWindow } from "@/components/windows/BasicInfoWindow"
 import { PlayerWindow } from "@/components/windows/PlayerWindow"
 import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
-import { useWindowManager, WINDOW_POSITION } from "@/hooks/useWindowManager"
 
 import type { ComponentProps } from "react"
 
@@ -89,6 +90,8 @@ const DUMMY_WORKS = [
 
 /** メインビュー */
 export const MainView = () => {
+  const { data } = useDataFetch()
+
   const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =
     useWindowManager([
       // BasicInfoWindowを初期状態で開いておく
@@ -105,6 +108,10 @@ export const MainView = () => {
 
   const visibleWorkDetailWindows = getVisibleWorkDetailWindows(DUMMY_WORKS)
 
+  if (data === undefined) {
+    return null
+  }
+
   return (
     <div className={styles.mainView}>
       <div className={styles.status}>
@@ -115,9 +122,9 @@ export const MainView = () => {
         <StarWidget />
       </div>
 
-      {/* BasicInfoWindow */}
       {basicInfoWindow !== undefined && basicInfoWindow.isVisible && (
         <BasicInfoWindow
+          basicInfo={data.basicInfo}
           bottom={basicInfoWindow.currentY === undefined ? 48 : undefined}
           isFullScreen={basicInfoWindow.isFullScreen ?? false}
           left={basicInfoWindow.currentX}
@@ -135,7 +142,6 @@ export const MainView = () => {
         <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={DUMMY_WORKS} />
       </div>
 
-      {/* WorkDetailWindows */}
       {visibleWorkDetailWindows.map(({ windowState, workData }) => (
         <WorkDetailWindow
           key={windowState.id}

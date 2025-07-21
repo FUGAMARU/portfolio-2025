@@ -8,10 +8,14 @@ import styles from "@/components/windows/BasicInfoWindow/index.module.css"
 import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
+import type { ApiResponse } from "@/components/views/MainView/useDataFetch"
 import type { ComponentProps } from "react"
 
 /** Props */
-type Props = Pick<
+type Props = {
+  /** 基本情報 */
+  basicInfo: ApiResponse["basicInfo"]
+} & Pick<
   ComponentProps<typeof WindowContainer>,
   "left" | "bottom" | "top" | "zIndex" | "isFullScreen" | "onFocus" | "onPositionChange"
 > &
@@ -19,6 +23,7 @@ type Props = Pick<
 
 /** 基本情報ウィンドウ */
 export const BasicInfoWindow = ({
+  basicInfo,
   left,
   bottom,
   top,
@@ -82,46 +87,44 @@ export const BasicInfoWindow = ({
       zIndex={zIndex}
     >
       <div className={styles.basicInfoWindow}>
-        <h1 className={styles.name}>YAMADA Taro</h1>
+        <h1 className={styles.name}>{basicInfo.name}</h1>
 
         <div className={styles.info}>
           <div className={styles.row}>
             <span className={styles.icon}>
               <WrenchIcon />
             </span>
-            <span className={styles.label}>Frontend Engineer — hogePoyo Inc. (Tokyo)</span>
+            <span className={styles.label}>{basicInfo.title}</span>
           </div>
 
           <div className={styles.row}>
             <span className={styles.icon}>
               <CakeIcon />
             </span>
-            <span className={clsx(styles.label, styles.Numeric)}>2002/05/04</span>
+            <span className={clsx(styles.label, styles.Numeric)}>{basicInfo.birthday}</span>
           </div>
         </div>
 
         <div className={styles.badges}>
           <div className={styles.row}>
-            <BadgeLinkButton
-              alt="alt"
-              height={20}
-              href="https://google.com"
-              src="https://placehold.jp/980x200.png"
-            />
+            {basicInfo.badges.upper.map(badge => (
+              <BadgeLinkButton
+                key={badge.src}
+                height={badge.height}
+                href={badge.href}
+                src={`${import.meta.env.VITE_API_ORIGIN}${badge.src}`}
+              />
+            ))}
           </div>
           <div className={styles.row}>
-            <BadgeLinkButton
-              alt="alt"
-              height={20}
-              href="https://google.com"
-              src="https://placehold.jp/980x200.png"
-            />
-            <BadgeLinkButton
-              alt="alt"
-              height={20}
-              href="https://google.com"
-              src="https://placehold.jp/980x200.png"
-            />
+            {basicInfo.badges.lower.map(badge => (
+              <BadgeLinkButton
+                key={badge.src}
+                height={badge.height}
+                href={badge.href}
+                src={`${import.meta.env.VITE_API_ORIGIN}${badge.src}`}
+              />
+            ))}
           </div>
         </div>
       </div>

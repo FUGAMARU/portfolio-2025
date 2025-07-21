@@ -5,14 +5,14 @@ import type { ComponentProps } from "react"
 
 /** Props */
 type Props = Required<
-  Pick<ComponentProps<typeof Link>, "href"> & Pick<ComponentProps<"img">, "src" | "alt" | "height">
+  Pick<ComponentProps<typeof Link>, "href"> & Pick<ComponentProps<"img">, "src" | "height">
 >
 
 /** バッジリンクコンポーネント */
-export const BadgeLinkButton = ({ href, src, alt, height }: Props) => {
+export const BadgeLinkButton = ({ href, src, height }: Props) => {
   return (
     <Link className={styles.badgeLinkButton} href={href}>
-      <img alt={alt} height={height} src={src} />
+      <img height={height} src={src} />
     </Link>
   )
 }
