@@ -1,3 +1,5 @@
+/* ホバー時のアニメーション参考: https://www.tam-tam.co.jp/tipsnote/html_css/post11618.html */
+
 .workButton {
   position: relative;
   display: grid;
@@ -10,6 +12,10 @@
     10px 15px 10px rgb(0 0 0 / 10%),
     inset -5px -5px 10px rgb(255 255 255 / 70%);
   backdrop-filter: blur(2px);
+
+  &:hover {
+    animation: gel-animation 1.2s ease-out;
+  }
 
   &::before {
     position: absolute;
@@ -25,5 +31,51 @@
     width: 50%;
     height: 50%;
     object-fit: cover;
+  }
+}
+
+@keyframes gel-animation {
+  0% {
+    transform: skew(0deg, 0deg) scale(1);
+  }
+
+  8% {
+    transform: skew(3deg, 2.5deg) scale(1.02);
+  }
+
+  16% {
+    transform: skew(-2.5deg, -2deg) scale(1.01);
+  }
+
+  24% {
+    transform: skew(2deg, 1.5deg) scale(1.01);
+  }
+
+  32% {
+    transform: skew(-1.5deg, -1deg) scale(1.005);
+  }
+
+  40% {
+    transform: skew(1deg, 0.8deg) scale(1.002);
+  }
+
+  48% {
+    transform: skew(-0.7deg, -0.5deg) scale(1.001);
+  }
+
+  56% {
+    transform: skew(0.4deg, 0.3deg) scale(1);
+  }
+
+  64% {
+    transform: skew(-0.2deg, -0.2deg) scale(1);
+  }
+
+  72% {
+    transform: skew(0.1deg, 0.1deg) scale(1);
+  }
+
+  100% {
+    transform: skew(0deg, 0deg) scale(1);
   }
 }
