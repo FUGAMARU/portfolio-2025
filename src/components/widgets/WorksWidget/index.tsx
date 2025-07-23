@@ -1,5 +1,6 @@
 import { WorkButton } from "@/components/parts/button/WorkButton"
 import styles from "@/components/widgets/WorksWidget/index.module.css"
+import { getUrl } from "@/utils"
 
 /** Props */
 type Props = {
@@ -20,7 +21,10 @@ export const WorksWidget = ({ onWorkButtonClick: handleWorkButtonClick, worksDat
     <div className={styles.worksWidget}>
       {worksData.map(work => (
         <div key={work.id} className={styles.item}>
-          <WorkButton onClick={() => handleWorkButtonClick(work.id)} src={work.buttonImage} />
+          <WorkButton
+            onClick={() => handleWorkButtonClick(work.id)}
+            src={getUrl(work.buttonImage)}
+          />
         </div>
       ))}
     </div>

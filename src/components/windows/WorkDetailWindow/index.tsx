@@ -1,29 +1,16 @@
 import { GeneralButton } from "@/components/parts/button/GeneralButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
+import { getUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
+import type { Work } from "@/components/views/MainView/useDataFetch"
 import type { ComponentProps } from "react"
 
 import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 
 /** Props */
-type Props = {
-  /** プレビュー画像 */
-  previewImage: string
-  /** ロゴ画像 */
-  logoImage: string
-  /** タグ一覧 */
-  tags: Array<string>
-  /** 説明文 */
-  description: string
-  /** 参考リンク一覧 */
-  referenceLinks: Array<{
-    /** テキスト */
-    text: string
-    /** 遷移先 */
-    href: string
-  }>
-} & Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
+type Props = Work &
+  Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
   Pick<
     ComponentProps<typeof WindowContainer>,
     "left" | "top" | "onPositionChange" | "zIndex" | "onFocus"
@@ -40,9 +27,15 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
       {...windowContainerProps}
     >
       <div className={styles.workDetailWindow}>
-        <img className={styles.preview} src={windowContainerProps.previewImage} width={500} />
+        <div className={styles.preview}>
+          <img
+            className={styles.image}
+            src={getUrl(windowContainerProps.previewImage)}
+            width={500}
+          />
+        </div>
         <div className={styles.info}>
-          <img className={styles.logo} height={70} src={windowContainerProps.logoImage} />
+          <img className={styles.logo} height={70} src={getUrl(windowContainerProps.logoImage)} />
 
           <div className={styles.tags}>
             {windowContainerProps.tags.map((tag, index) => (
