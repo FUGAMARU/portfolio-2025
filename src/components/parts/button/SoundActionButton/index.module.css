@@ -2,9 +2,9 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  width: fit-content;
+  justify-content: center;
+  width: 9.375rem;
   height: 2.25rem;
-  padding: 0 0.75rem;
   background-color: var(--color-use-case-general-button-alpha-50);
   border: solid 1px var(--color-use-case-general-button-color);
   border-radius: 0.5rem;

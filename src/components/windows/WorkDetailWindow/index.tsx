@@ -1,12 +1,11 @@
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
+import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 import { getUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { Work } from "@/components/views/MainView/useDataFetch"
 import type { ComponentProps } from "react"
-
-import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 
 /** Props */
 type Props = Work &
@@ -21,6 +20,7 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
   return (
     <WindowContainer
       hasWindowControl
+      isFixed={false}
       isFullScreen={false}
       onFocus={onFocus}
       zIndex={zIndex}

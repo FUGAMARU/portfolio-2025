@@ -77,6 +77,7 @@ export const BasicInfoWindow = ({
     <WindowContainer
       bottom={bottom}
       hasWindowControl
+      isFixed={false}
       isFullScreen={actualIsFullScreen}
       left={left}
       onClose={handleCloseButtonClick}

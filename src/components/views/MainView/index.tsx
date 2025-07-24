@@ -8,8 +8,16 @@ import { BasicInfoWindow } from "@/components/windows/BasicInfoWindow"
 import { PlayerWindow } from "@/components/windows/PlayerWindow"
 import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
 
+/** Props */
+type Props = {
+  /** ミュートしているかどうか */
+  isMuted: boolean
+}
+
 /** メインビュー */
-export const MainView = () => {
+export const MainView = ({ isMuted }: Props) => {
+  console.log(isMuted)
+
   const { data } = useDataFetch()
 
   const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =

@@ -6,7 +6,8 @@ body {
   color: var(--color-general-white);
   background-color: var(--color-use-case-background);
   background-image: url("/background.jpg");
-  background-position-y: 30%;
+  background-attachment: fixed;
+  background-position: center 30%;
   background-size: cover;
 }
 

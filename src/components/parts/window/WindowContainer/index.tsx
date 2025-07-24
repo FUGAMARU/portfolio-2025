@@ -45,23 +45,19 @@ type Props = (PropsWithWindowControl | PropsWithoutWindowControl) &
     children: ReactNode
     /** フルスクリーン表示するかどうか */
     isFullScreen: boolean
+    /** ウィンドウを固定表示するかどうか（ドラッグ移動・サイズ変更を禁止） */
+    isFixed: boolean
     /** z-index */
     zIndex?: number
     /** ウィンドウがフォーカスされた時の処理 */
     onFocus?: () => void
   }
 
-const DEFAULT_POSITION = {
-  x: 0,
-  y: 0,
-  width: "auto",
-  height: "auto"
-} as const satisfies ComponentProps<typeof Rnd>["default"]
-
 /** ウィンドウコンテナ */
 export const WindowContainer = ({
   children,
   isFullScreen,
+  isFixed,
   top,
   left,
   right,
@@ -81,10 +77,31 @@ export const WindowContainer = ({
       return
     }
 
-    /** childrenの初期サイズの計測とSet */
-    const measureInitialSizeAndSetPosition = () => {
-      const element = windowContentRef.current
+    /** X座標を計算する */
+    const calculateXPosition = (windowWidth: number, elementWidth: number): number => {
+      if (left !== undefined) {
+        return left
+      }
+      if (right !== undefined) {
+        return windowWidth - elementWidth - right
+      }
+      return (windowWidth - elementWidth) / 2 // デフォルトは中央
+    }
 
+    /** Y座標を計算する */
+    const calculateYPosition = (windowHeight: number, elementHeight: number): number => {
+      if (top !== undefined) {
+        return top
+      }
+      if (bottom !== undefined) {
+        return windowHeight - elementHeight - bottom
+      }
+      return (windowHeight - elementHeight) / 2 // デフォルトは中央
+    }
+
+    /** 初期サイズを計測して位置を設定する */
+    const measureAndSetInitialPosition = () => {
+      const element = windowContentRef.current
       if (element === null) {
         return
       }
@@ -92,27 +109,17 @@ export const WindowContainer = ({
       const { offsetWidth, offsetHeight } = element
       setInitialSize({ width: offsetWidth, height: offsetHeight })
 
-      let x = 0
-      let y = 0
-
-      if (left !== undefined) {
-        x = left
-      } else if (right !== undefined) {
-        x = window.innerWidth - offsetWidth - right
+      const position = {
+        x: calculateXPosition(window.innerWidth, offsetWidth),
+        y: calculateYPosition(window.innerHeight, offsetHeight)
       }
 
-      if (top !== undefined) {
-        y = top
-      } else if (bottom !== undefined) {
-        y = window.innerHeight - offsetHeight - bottom
-      }
-
-      rndRef.current?.updatePosition({ x, y })
-
+      rndRef.current?.updatePosition(position)
       setIsInitialized(true)
     }
 
-    document.fonts.ready.then(measureInitialSizeAndSetPosition) // フォントや画像の読み込みを待ってから実行
+    // フォントや画像の読み込みを待ってから実行
+    document.fonts.ready.then(measureAndSetInitialPosition)
   }, [isInitialized, top, left, right, bottom])
 
   // isFullScreenの場合はRndを使わない
@@ -132,8 +139,14 @@ export const WindowContainer = ({
   return (
     <Rnd
       ref={rndRef}
-      default={DEFAULT_POSITION}
-      disableDragging={!isInitialized}
+      default={{
+        x: 0,
+        y: 0,
+        width: "auto",
+        height: "auto"
+      }}
+      disableDragging={!isInitialized || isFixed}
+      enableResizing={!isFixed}
       minHeight={initialSize.height ?? "auto"}
       minWidth={initialSize.width ?? "auto"}
       onDrag={(_, data) => {
