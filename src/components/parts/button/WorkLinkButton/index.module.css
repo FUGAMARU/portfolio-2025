@@ -1,0 +1,24 @@
+.workLinkButton {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  width: fit-content;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--color-use-case-general-button-alpha-50);
+  border: solid 1px var(--color-use-case-general-button-color);
+  border-radius: 0.5rem;
+
+  > .text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-general-rich-yellow);
+    text-box: trim-both cap alphabetic;
+  }
+
+  > .icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    line-height: 1;
+    stroke: var(--color-general-rich-yellow);
+  }
+}

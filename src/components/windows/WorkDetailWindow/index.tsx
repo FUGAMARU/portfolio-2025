@@ -1,4 +1,4 @@
-import { GeneralButton } from "@/components/parts/button/GeneralButton"
+import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
 import { getUrl } from "@/utils"
 
@@ -49,7 +49,7 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
 
           <div className={styles.links}>
             {windowContainerProps.referenceLinks.map((link, index) => (
-              <GeneralButton key={index} href={link.href} text={link.text} />
+              <WorkLinkButton key={index} href={link.href} text={link.text} />
             ))}
           </div>
         </div>

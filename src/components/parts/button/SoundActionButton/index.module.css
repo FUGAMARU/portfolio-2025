@@ -1,24 +1,30 @@
-.generalButton {
+.soundActionButton {
   display: flex;
-  gap: 4px;
+  gap: 0.5rem;
   align-items: center;
   width: fit-content;
-  padding: 6px 12px;
+  height: 2.25rem;
+  padding: 0 0.75rem;
   background-color: var(--color-use-case-general-button-alpha-50);
   border: solid 1px var(--color-use-case-general-button-color);
-  border-radius: 8px;
+  border-radius: 0.5rem;
 
   > .text {
-    font-size: 0.875rem;
+    font-size: 1.125rem;
     font-weight: 500;
     color: var(--color-general-rich-yellow);
     text-box: trim-both cap alphabetic;
   }
 
   > .icon {
-    width: 1.125rem;
-    height: 1.125rem;
+    width: 1.375rem;
+    height: 1.375rem;
     line-height: 1;
     stroke: var(--color-general-rich-yellow);
+
+    &.Larger {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 }
