@@ -9,19 +9,12 @@ import type { Dispatch, SetStateAction } from "react"
 type Props = {
   /** setIsMuted */
   setIsMuted: Dispatch<SetStateAction<boolean | undefined>>
-  /** フェードアウト中かどうか */
-  isTransitioning?: boolean
 }
 
 /** 初期表示ビュー */
-export const WelcomeView = ({ setIsMuted, isTransitioning = false }: Props) => {
+export const WelcomeView = ({ setIsMuted }: Props) => {
   return (
-    <WindowContainer
-      className={isTransitioning ? styles.fadeOut : undefined}
-      hasWindowControl={false}
-      isFixed
-      isFullScreen={false}
-    >
+    <WindowContainer hasWindowControl={false} isFixed isFullScreen={false}>
       <div className={styles.welcomeView}>
         <div className={styles.upper}>
           <span className={styles.icon}>
