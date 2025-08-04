@@ -4,7 +4,7 @@ import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 import { getUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
-import type { Work } from "@/components/views/MainView/useDataFetch"
+import type { Work } from "@/hooks/useDataFetch"
 import type { ComponentProps } from "react"
 
 /** Props */

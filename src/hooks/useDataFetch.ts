@@ -55,13 +55,24 @@ export type ApiResponse = {
       }>
     }
   }
+  /** BGM */
+  bgm: Array<{
+    /** タイトル */
+    title: string
+    /** アーティスト */
+    artists: Array<string>
+    /** アートワーク */
+    artwork: string
+    /** YouTube動画ID */
+    youtubeId: string
+  }>
   /** 作品一覧 */
   works: Array<Work>
 }
 
 /** データフェッチフック */
 export const useDataFetch = () => {
-  const [data, setData] = useState<ApiResponse>()
+  const [apiResponse, setApiResponse] = useState<ApiResponse>()
 
   useEffect(() => {
     /** データ取得関数 */
@@ -74,7 +85,7 @@ export const useDataFetch = () => {
         }
 
         const result: ApiResponse = await response.json()
-        setData(result)
+        setApiResponse(result)
       } catch (error) {
         console.error("エラー:", error)
       }
@@ -83,5 +94,5 @@ export const useDataFetch = () => {
     fetchData()
   }, [])
 
-  return { data } as const
+  return { apiResponse } as const
 }

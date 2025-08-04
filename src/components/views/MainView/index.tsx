@@ -1,24 +1,25 @@
 import styles from "@/components/views/MainView/index.module.css"
-import { useDataFetch } from "@/components/views/MainView/useDataFetch"
-import { useWindowManager, WINDOW_POSITION } from "@/components/views/MainView/useWindowManager"
 import { LoadingStatusWidget } from "@/components/widgets/LoadingStatusWidget"
 import { StarWidget } from "@/components/widgets/StarWidget"
 import { WorksWidget } from "@/components/widgets/WorksWidget"
 import { BasicInfoWindow } from "@/components/windows/BasicInfoWindow"
 import { PlayerWindow } from "@/components/windows/PlayerWindow"
 import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
+import { useWindowManager, WINDOW_POSITION } from "@/hooks/useWindowManager"
+
+import type { ApiResponse } from "@/hooks/useDataFetch"
 
 /** Props */
 type Props = {
   /** ミュートしているかどうか */
   isMuted: boolean
+  /** APIレスポンス */
+  apiResponse?: ApiResponse
 }
 
 /** メインビュー */
-export const MainView = ({ isMuted }: Props) => {
+export const MainView = ({ isMuted, apiResponse }: Props) => {
   console.log(isMuted)
-
-  const { data } = useDataFetch()
 
   const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =
     useWindowManager([
@@ -34,9 +35,9 @@ export const MainView = ({ isMuted }: Props) => {
       }
     ])
 
-  const visibleWorkDetailWindows = getVisibleWorkDetailWindows(data?.works ?? [])
+  const visibleWorkDetailWindows = getVisibleWorkDetailWindows(apiResponse?.works ?? [])
 
-  if (data === undefined) {
+  if (apiResponse === undefined) {
     return null
   }
 
@@ -52,7 +53,7 @@ export const MainView = ({ isMuted }: Props) => {
 
       {basicInfoWindow !== undefined && basicInfoWindow.isVisible && (
         <BasicInfoWindow
-          basicInfo={data.basicInfo}
+          basicInfo={apiResponse.basicInfo}
           bottom={basicInfoWindow.currentY === undefined ? 48 : undefined}
           isFullScreen={basicInfoWindow.isFullScreen ?? false}
           left={basicInfoWindow.currentX}
@@ -67,7 +68,7 @@ export const MainView = ({ isMuted }: Props) => {
       )}
 
       <div className={styles.works}>
-        <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={data.works} />
+        <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={apiResponse.works} />
       </div>
 
       {visibleWorkDetailWindows.map(({ windowState, workData }) => (

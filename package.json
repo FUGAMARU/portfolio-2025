@@ -14,12 +14,15 @@
     "@fontsource/ibm-plex-sans-jp": "^5.2.5",
     "@fontsource/iceland": "^5.2.5",
     "@fontsource/urbanist": "^5.2.5",
+    "@types/youtube-player": "^5.5.11",
     "animejs": "^4.1.2",
     "clsx": "^2.1.1",
     "destyle.css": "^4.0.1",
+    "es-toolkit": "^1.39.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-rnd": "^10.5.2"
+    "react-rnd": "^10.5.2",
+    "react-youtube": "^10.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

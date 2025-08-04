@@ -1,0 +1,16 @@
+.welcomeViewContainer {
+  opacity: 1;
+}
+
+.mainViewContainer {
+  opacity: 0;
+  transform: translateY(20px);
+
+  > .youtube {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+}
