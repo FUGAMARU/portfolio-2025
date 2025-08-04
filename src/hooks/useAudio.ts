@@ -5,8 +5,6 @@ import { useState, useEffect, useRef } from "react"
 
 import type { YouTubeEvent, YouTubePlayer } from "react-youtube"
 
-// export const YOUTUBE_ID_LIST = ["LWzlcOEzLhQ", "Lm4eYNuWcWE", "_dRNvNiPTV4"]
-
 /** オーディオ再生用カスタムフック */
 export const useAudio = (youtubeIdList: Array<string>) => {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
