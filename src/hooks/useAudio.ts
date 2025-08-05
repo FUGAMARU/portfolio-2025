@@ -1,6 +1,3 @@
-/**
- *
- */
 import { shuffle } from "es-toolkit"
 import { useSetAtom } from "jotai"
 import { useState, useEffect, useRef, useMemo } from "react"
