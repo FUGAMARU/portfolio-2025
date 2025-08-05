@@ -9,7 +9,7 @@ import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
 import { getUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
-import type { ApiResponse } from "@/components/views/MainView/useDataFetch"
+import type { ApiResponse } from "@/hooks/useDataFetch"
 import type { ComponentProps } from "react"
 
 /** Props */

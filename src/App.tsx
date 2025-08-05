@@ -1,6 +1,5 @@
 import { animate } from "animejs"
-import { shuffle } from "es-toolkit"
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useRef } from "react"
 import YouTube from "react-youtube"
 
 import styles from "@/App.module.css"
@@ -11,29 +10,19 @@ import { useDataFetch } from "@/hooks/useDataFetch"
 
 /** App */
 export const App = () => {
+  const { apiResponse } = useDataFetch()
+  const {
+    handleReady,
+    handlePlayButtonClick,
+    handleTrackEnd,
+    handlePlaybackStateChange,
+    currentYoutubeId
+  } = useAudio(apiResponse?.bgm ?? [])
+
   const [isMuted, setIsMuted] = useState<boolean>()
   const [showWelcome, setShowWelcome] = useState(true)
   const welcomeRef = useRef<HTMLDivElement>(null)
   const mainRef = useRef<HTMLDivElement>(null)
-
-  const { apiResponse } = useDataFetch()
-
-  const youtubeIdList = useMemo(() => {
-    if (apiResponse?.bgm === undefined) {
-      return []
-    }
-
-    const ids = apiResponse.bgm.map(bgm => bgm.youtubeId)
-    return shuffle(ids)
-  }, [apiResponse?.bgm])
-
-  const {
-    currentTrackIndex,
-    handleReady,
-    handlePlayButtonClick,
-    handleTrackEnd,
-    handlePlaybackStateChange
-  } = useAudio(youtubeIdList)
 
   // WelcomeViewのフェードアウトアニメーション
   useEffect(() => {
@@ -93,7 +82,7 @@ export const App = () => {
               autoplay: isMuted === true ? 0 : 1
             }
           }}
-          videoId={youtubeIdList[currentTrackIndex]}
+          videoId={currentYoutubeId}
         />
       </div>
     </div>

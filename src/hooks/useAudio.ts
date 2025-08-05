@@ -1,14 +1,31 @@
 /**
  *
  */
-import { useState, useEffect, useRef } from "react"
+import { shuffle } from "es-toolkit"
+import { useSetAtom } from "jotai"
+import { useState, useEffect, useRef, useMemo } from "react"
 
+import { audioAtom } from "@/stores/audioAtoms"
+
+import type { ApiResponse } from "@/hooks/useDataFetch"
 import type { YouTubeEvent, YouTubePlayer } from "react-youtube"
 
 /** オーディオ再生用カスタムフック */
-export const useAudio = (youtubeIdList: Array<string>) => {
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
+export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
+  // APIレスポンスデーター関連
+  const shuffledBgmData = useMemo(() => shuffle(apiResponseBgmData), [apiResponseBgmData])
+  const youtubeIdList = useMemo(() => shuffledBgmData.map(bgm => bgm.youtubeId), [shuffledBgmData])
+
+  // 再生ステータス関連
   const [currentTime, setCurrentTime] = useState(0)
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
+  const currentYoutubeId = useMemo(
+    () => youtubeIdList[currentTrackIndex],
+    [youtubeIdList, currentTrackIndex]
+  )
+
+  // プレイヤー関連
+  const setAudio = useSetAtom(audioAtom)
   const [playbackState, setPlaybackState] = useState(-1)
   const playbackHistoryRef = useRef<Array<number>>([])
   const playerRef = useRef<YouTubePlayer>(null)
@@ -50,6 +67,14 @@ export const useAudio = (youtubeIdList: Array<string>) => {
   /** 再生状態が変更された時の処理 */
   const handlePlaybackStateChange = (event: YouTubeEvent) => {
     playbackHistoryRef.current = [playbackState, ...playbackHistoryRef.current.slice(0, 1)]
+
+    if (
+      (playbackHistoryRef.current[0] === -1 || playbackHistoryRef.current[1] === -1) &&
+      event.data === 1
+    ) {
+      setAudio(shuffledBgmData[currentTrackIndex])
+    }
+
     setPlaybackState(event.data)
   }
 
@@ -69,12 +94,10 @@ export const useAudio = (youtubeIdList: Array<string>) => {
   }, [])
 
   return {
-    currentTrackIndex,
-    currentTime,
-    playbackState,
     handleReady,
     handlePlayButtonClick,
     handleTrackEnd,
-    handlePlaybackStateChange
+    handlePlaybackStateChange,
+    currentYoutubeId
   }
 }
