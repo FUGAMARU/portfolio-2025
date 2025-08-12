@@ -30,13 +30,18 @@ export const App = () => {
       setIsMuted,
       startPlayback: handlePlayButtonClick,
       progressPercent,
-      isPlaying
+      isPlaying,
+      canFadeOutWelcome: apiResponse !== undefined
     }
   )
 
-  if (showWelcome) {
-    return (
-      <>
+  const shouldShowWelcomeView = showWelcome || apiResponse === undefined
+  // WelcomeView完全終了後のみMainを出現させる
+  const shouldStartAppear = !shouldShowWelcomeView
+
+  return (
+    <>
+      {shouldShowWelcomeView && (
         <div ref={welcomeRef} className={styles.welcomeViewContainer}>
           <WelcomeView
             isPlayButtonShowsSpinner={isPlayButtonShowsSpinner}
@@ -44,28 +49,16 @@ export const App = () => {
             setIsMuted={setIsMuted}
           />
         </div>
-        <div className={styles.youtube}>
-          <YouTube
-            onEnd={goToNextTrack}
-            onReady={handleReady}
-            onStateChange={handlePlaybackStateChange}
-            opts={{
-              playerVars: {
-                autoplay: 0
-              }
-            }}
-            videoId={currentYoutubeId}
-          />
-        </div>
-      </>
-    )
-  }
+      )}
 
-  return (
-    <>
-      <div ref={mainRef} className={styles.mainViewContainer}>
-        <MainView apiResponse={apiResponse} isMuted={isMuted ?? false} />
+      <div ref={mainRef} style={{ visibility: shouldStartAppear ? "visible" : "hidden" }}>
+        <MainView
+          apiResponse={apiResponse}
+          isMuted={isMuted ?? false}
+          shouldRenderWindows={shouldStartAppear}
+        />
       </div>
+
       <div className={styles.youtube}>
         <YouTube
           onEnd={goToNextTrack}

@@ -1,3 +1,5 @@
+import clsx from "clsx"
+
 import styles from "@/components/views/MainView/index.module.css"
 import { LoadingStatusWidget } from "@/components/widgets/LoadingStatusWidget"
 import { StarWidget } from "@/components/widgets/StarWidget"
@@ -15,10 +17,12 @@ type Props = {
   isMuted: boolean
   /** APIレスポンス */
   apiResponse?: ApiResponse
+  /** Welcome表示中はウィンドウを描画しない */
+  shouldRenderWindows?: boolean
 }
 
 /** メインビュー */
-export const MainView = ({ isMuted, apiResponse }: Props) => {
+export const MainView = ({ isMuted, apiResponse, shouldRenderWindows = true }: Props) => {
   console.log(isMuted)
 
   const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =
@@ -43,11 +47,21 @@ export const MainView = ({ isMuted, apiResponse }: Props) => {
 
   return (
     <div className={styles.mainView}>
-      <div className={styles.status}>
+      <div
+        className={clsx(
+          styles.status,
+          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
+        )}
+      >
         <LoadingStatusWidget />
       </div>
 
-      <div className={styles.star}>
+      <div
+        className={clsx(
+          styles.star,
+          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
+        )}
+      >
         <StarWidget />
       </div>
 
@@ -62,32 +76,44 @@ export const MainView = ({ isMuted, apiResponse }: Props) => {
           onMaximize={() => windowActions.maximize("basic-info")}
           onMinimize={() => windowActions.minimize("basic-info")}
           onPositionChange={position => windowActions.updatePosition("basic-info", position)}
+          shouldAppear={shouldRenderWindows}
           top={basicInfoWindow.currentY}
           zIndex={basicInfoWindow.zIndex}
         />
       )}
 
-      <div className={styles.works}>
+      <div
+        className={clsx(
+          styles.works,
+          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
+        )}
+      >
         <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={apiResponse.works} />
       </div>
 
-      {visibleWorkDetailWindows.map(({ windowState, workData }) => (
-        <WorkDetailWindow
-          key={windowState.id}
-          left={windowState.currentX}
-          onClose={() => windowActions.close(workData.id)}
-          onFocus={() => windowActions.focus(workData.id)}
-          onMaximize={() => windowActions.maximize(workData.id)}
-          onMinimize={() => windowActions.minimize(workData.id)}
-          onPositionChange={position => windowActions.updatePosition(workData.id, position)}
-          top={windowState.currentY ?? WINDOW_POSITION.INITIAL_TOP}
-          zIndex={windowState.zIndex}
-          {...workData}
-        />
-      ))}
+      {shouldRenderWindows &&
+        visibleWorkDetailWindows.map(({ windowState, workData }) => (
+          <WorkDetailWindow
+            key={windowState.id}
+            left={windowState.currentX}
+            onClose={() => windowActions.close(workData.id)}
+            onFocus={() => windowActions.focus(workData.id)}
+            onMaximize={() => windowActions.maximize(workData.id)}
+            onMinimize={() => windowActions.minimize(workData.id)}
+            onPositionChange={position => windowActions.updatePosition(workData.id, position)}
+            top={windowState.currentY ?? WINDOW_POSITION.INITIAL_TOP}
+            zIndex={windowState.zIndex}
+            {...workData}
+          />
+        ))}
 
       {/** プレイヤーの方が上のレイヤーにある */}
-      <div className={styles.player}>
+      <div
+        className={clsx(
+          styles.player,
+          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
+        )}
+      >
         <PlayerWindow />
       </div>
     </div>

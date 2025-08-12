@@ -51,6 +51,8 @@ type Props = (PropsWithWindowControl | PropsWithoutWindowControl) &
     zIndex?: number
     /** ウィンドウがフォーカスされた時の処理 */
     onFocus?: () => void
+    /** 表示制御（false→trueでopacityフェード） */
+    shouldAppear?: boolean
   }
 
 /** ウィンドウコンテナ */
@@ -65,6 +67,7 @@ export const WindowContainer = ({
   zIndex,
   onFocus,
   onPositionChange: handlePositionChange,
+  shouldAppear = true,
   ...windowControlProps
 }: Props) => {
   const [isInitialized, setIsInitialized] = useState(false)
@@ -125,7 +128,13 @@ export const WindowContainer = ({
   // isFullScreenの場合はRndを使わない
   if (isFullScreen) {
     return (
-      <div className={clsx(styles.windowContainer, styles.FullScreen)}>
+      <div
+        className={clsx(
+          styles.windowContainer,
+          styles.FullScreen,
+          shouldAppear ? styles.AppearShown : styles.AppearHidden
+        )}
+      >
         {windowControlProps.hasWindowControl === true && (
           <div className={styles.control}>
             <WindowControl {...windowControlProps} />
@@ -159,7 +168,11 @@ export const WindowContainer = ({
     >
       <div
         ref={windowContentRef}
-        className={clsx(styles.windowContainer, isFullScreen && styles.FullScreen)}
+        className={clsx(
+          styles.windowContainer,
+          isFullScreen && styles.FullScreen,
+          shouldAppear ? styles.AppearShown : styles.AppearHidden
+        )}
         onClick={onFocus}
         onMouseDown={onFocus}
       >

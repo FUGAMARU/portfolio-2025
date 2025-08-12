@@ -18,7 +18,14 @@ type Props = {
   basicInfo: ApiResponse["basicInfo"]
 } & Pick<
   ComponentProps<typeof WindowContainer>,
-  "left" | "bottom" | "top" | "zIndex" | "isFullScreen" | "onFocus" | "onPositionChange"
+  | "left"
+  | "bottom"
+  | "top"
+  | "zIndex"
+  | "isFullScreen"
+  | "onFocus"
+  | "onPositionChange"
+  | "shouldAppear"
 > &
   Partial<ComponentProps<typeof WindowControl>>
 
@@ -34,7 +41,8 @@ export const BasicInfoWindow = ({
   onMinimize: handleMinimize,
   onMaximize: handleMaximize,
   onFocus,
-  onPositionChange
+  onPositionChange,
+  shouldAppear
 }: Props) => {
   const [shouldDisplay, setShouldDisplay] = useState(true)
   const [isFullScreen, setIsFullScreen] = useState(false)
@@ -85,6 +93,7 @@ export const BasicInfoWindow = ({
       onMaximize={handleMaximizeButtonClick}
       onMinimize={handleMinimizeButtonClick}
       onPositionChange={onPositionChange}
+      shouldAppear={shouldAppear}
       top={top}
       zIndex={zIndex}
     >

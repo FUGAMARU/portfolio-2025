@@ -1,14 +1,10 @@
 import { animate } from "animejs"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-/** Welcomeフェードの所要時間(ms) */
+/** WelcomeView表示フェードアニメーションの所要時間(ms) */
 const WELCOME_FADE_DURATION_MS = 800
-/** Welcomeフェード（ミュート選択時）の開始遅延(ms) */
-const WELCOME_MUTED_FADE_DELAY_MS = 300
-/** Welcomeフェード（再生開始後）の開始遅延(ms) */
-const WELCOME_STARTED_FADE_DELAY_MS = 0
-/** Mainフェードの所要時間(ms) */
-const MAIN_FADE_DURATION_MS = 600
+/** WelcomeView表示フェードアニメーション（ミュート選択時）の開始遅延(ms) */
+const WELCOME_MUTED_FADE_DELAY_MS = 200
 /** 再生開始からWelcomeフェードまでの待機時間(ms) */
 const STARTED_TO_FADE_DELAY_MS = 2000
 
@@ -24,6 +20,8 @@ type Params = {
   progressPercent: number
   /** 再生中フラグ */
   isPlaying: boolean
+  /** Welcomeをフェードアウトしてよいか（データ準備などの外部条件で制御） */
+  canFadeOutWelcome?: boolean
 }
 
 /** WelcomeViewとMainViewの切替およびアニメーションを管理するフック */
@@ -32,12 +30,12 @@ export const useViewSwitch = ({
   setIsMuted,
   startPlayback,
   progressPercent,
-  isPlaying
+  isPlaying,
+  canFadeOutWelcome = true
 }: Params) => {
   const [showWelcome, setShowWelcome] = useState(true)
   const [isPlayButtonShowsSpinner, setIsPlayButtonShowsSpinner] = useState(false)
   const [playStartedAtMs, setPlayStartedAtMs] = useState<number | null>(null)
-
   const welcomeRef = useRef<HTMLDivElement>(null)
   const mainRef = useRef<HTMLDivElement>(null)
   const hasQueuedFadeRef = useRef(false)
@@ -63,7 +61,7 @@ export const useViewSwitch = ({
   // ミュート選択時にWelcomeViewを即フェードアウトする副作用
   useEffect(() => {
     const isMutedOn = isMuted === true
-    if (!isMutedOn || welcomeRef.current === null) {
+    if (!isMutedOn || welcomeRef.current === null || !canFadeOutWelcome) {
       return
     }
 
@@ -73,7 +71,7 @@ export const useViewSwitch = ({
       delay: WELCOME_MUTED_FADE_DELAY_MS,
       onComplete: handleWelcomeFadeOutComplete
     })
-  }, [isMuted, handleWelcomeFadeOutComplete])
+  }, [isMuted, canFadeOutWelcome, handleWelcomeFadeOutComplete])
 
   // BGM再生開始（progress>0 もしくは playing）を検知し、開始時刻を記録する副作用
   useEffect(() => {
@@ -95,7 +93,7 @@ export const useViewSwitch = ({
   // 再生開始から一定秒数経過後にWelcomeViewをフェードアウトする副作用
   useEffect(() => {
     const isMutedOff = isMuted === false
-    if (!isMutedOff || welcomeRef.current === null || showWelcome === false) {
+    if (!isMutedOff || welcomeRef.current === null || showWelcome === false || !canFadeOutWelcome) {
       return
     }
 
@@ -116,26 +114,18 @@ export const useViewSwitch = ({
       animate(welcomeRef.current, {
         opacity: [1, 0],
         duration: WELCOME_FADE_DURATION_MS,
-        delay: WELCOME_STARTED_FADE_DELAY_MS,
         onComplete: handleDelayedWelcomeFadeOutComplete
       })
     }, remaining)
 
     return () => window.clearTimeout(timer)
-  }, [isMuted, playStartedAtMs, showWelcome, handleDelayedWelcomeFadeOutComplete])
-
-  // WelcomeView非表示後にMainViewをフェードインする副作用
-  useEffect(() => {
-    if (showWelcome || mainRef.current === null) {
-      return
-    }
-
-    animate(mainRef.current, {
-      opacity: [0, 1],
-      translateY: [20, 0],
-      duration: MAIN_FADE_DURATION_MS
-    })
-  }, [showWelcome])
+  }, [
+    isMuted,
+    canFadeOutWelcome,
+    playStartedAtMs,
+    showWelcome,
+    handleDelayedWelcomeFadeOutComplete
+  ])
 
   return {
     showWelcome,
