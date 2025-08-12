@@ -9,10 +9,18 @@ import type { Dispatch, SetStateAction } from "react"
 type Props = {
   /** setIsMuted */
   setIsMuted: Dispatch<SetStateAction<boolean | undefined>>
+  /** Playボタン押下時に実行（再生開始処理を委譲） */
+  onPlayClick?: () => void
+  /** Playボタンがスピナー表示かどうか */
+  isPlayButtonShowsSpinner?: boolean
 }
 
 /** 初期表示ビュー */
-export const WelcomeView = ({ setIsMuted }: Props) => {
+export const WelcomeView = ({
+  setIsMuted,
+  onPlayClick,
+  isPlayButtonShowsSpinner = false
+}: Props) => {
   return (
     <WindowContainer hasWindowControl={false} isFixed isFullScreen={false}>
       <div className={styles.welcomeView}>
@@ -29,8 +37,11 @@ export const WelcomeView = ({ setIsMuted }: Props) => {
         </div>
 
         <div className={styles.actions}>
-          {/* ボタンクリックしたらプログレスバー表示するなりしたい */}
-          <SoundActionButton displayType="on" onClick={() => setIsMuted(false)} />
+          <SoundActionButton
+            displayType="on"
+            onClick={() => (onPlayClick !== undefined ? onPlayClick() : setIsMuted(false))}
+            shouldShowSpinner={isPlayButtonShowsSpinner}
+          />
           <SoundActionButton displayType="off" onClick={() => setIsMuted(true)} />
         </div>
       </div>

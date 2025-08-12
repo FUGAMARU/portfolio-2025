@@ -15,10 +15,14 @@
   }
 
   > .text {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    text-box: trim-both cap alphabetic;
     font-size: 1.125rem;
     font-weight: 500;
     color: var(--color-general-rich-yellow);
-    text-box: trim-both cap alphabetic;
   }
 
   > .icon {
@@ -31,5 +35,35 @@
       width: 1.5rem;
       height: 1.5rem;
     }
+
+    &.Hidden {
+      display: none;
+    }
+  }
+}
+
+.loadingSpinner {
+  --weight: 1.5px;
+
+  width: 1em;
+  aspect-ratio: 1;
+  background: var(--color-general-rich-yellow);
+  border-radius: 50%;
+  mask:
+    repeating-conic-gradient(#0000 0deg, #000 1deg 70deg, #0000 71deg 90deg),
+    radial-gradient(
+      farthest-side,
+      #0000 calc(100% - var(--weight) - 1px),
+      #000 calc(100% - var(--weight))
+    );
+
+  /* 交差合成でリングを作る */
+  mask-composite: intersect;
+  animation: rotation 1s infinite linear;
+}
+
+@keyframes rotation {
+  to {
+    transform: rotate(0.5turn);
   }
 }
