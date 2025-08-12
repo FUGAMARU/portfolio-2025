@@ -3,20 +3,56 @@
   gap: 10px;
 
   > .button {
+    position: relative;
     width: 12px;
     height: 12px;
+    cursor: default;
     border-radius: 50%;
+
+    > .icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 15px;
+      height: 15px;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+
+      > svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        transform: scale(var(--icon-scale, 1));
+        transform-origin: 50% 50%;
+      }
+    }
 
     &.Close {
       background-color: var(--color-use-case-window-control-close);
+
+      > .icon > svg {
+        --icon-scale: 0.7;
+      }
     }
 
     &.Minimize {
       background-color: var(--color-use-case-window-control-minimize);
+
+      > .icon > svg {
+        --icon-scale: 0.7;
+      }
     }
 
     &.Maximize {
       background-color: var(--color-use-case-window-control-maximize);
+
+      > .icon > svg {
+        --icon-scale: 0.4;
+      }
     }
+  }
+
+  &:hover > .button > .icon {
+    opacity: 1;
   }
 }
