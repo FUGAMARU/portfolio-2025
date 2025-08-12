@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react"
+
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
 import styles from "@/components/windows/WorkDetailWindow/index.module.css"
@@ -17,6 +19,64 @@ type Props = Work &
 
 /** 作品詳細ウィンドウ */
 export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: Props) => {
+  const descriptionRef = useRef<HTMLParagraphElement | null>(null)
+  const thumbRef = useRef<HTMLDivElement | null>(null)
+
+  // macOSなどではオーバーレイスクロールバーが採用されており、ユーザーのシステム設定やOSの挙動により未操作時は非表示になる。
+  // 今回はカスタムスクロールバーを常時表示させたいので、独自のトラック/サムを描写し、サムの位置やサイズを同期させるためにuseEffectでDOM計測とイベント購読を実装している。
+  useEffect(() => {
+    const descriptionElement = descriptionRef.current
+    const thumbElement = thumbRef.current
+    if (descriptionElement === null || thumbElement === null) {
+      return
+    }
+
+    /** スクロール位置と内容の高さに応じて、カスタムスクロールバーのサムを更新する */
+    const updateThumb = () => {
+      const visibleHeight = descriptionElement.clientHeight
+      const totalHeight = descriptionElement.scrollHeight
+      const scrollTop = descriptionElement.scrollTop
+      const trackHeight = visibleHeight
+
+      if (totalHeight <= 0 || trackHeight <= 0) {
+        return
+      }
+
+      const contentScrollable = totalHeight > visibleHeight
+      const minThumbHeight = 24
+      const calculatedThumbHeight = contentScrollable
+        ? Math.max((visibleHeight / totalHeight) * trackHeight, minThumbHeight)
+        : trackHeight
+
+      const maxThumbTop = Math.max(trackHeight - calculatedThumbHeight, 0)
+      const scrollProgress = contentScrollable
+        ? scrollTop / Math.max(totalHeight - visibleHeight, 1)
+        : 0
+      const thumbTop = maxThumbTop * scrollProgress
+
+      thumbElement.style.height = `${calculatedThumbHeight}px`
+      thumbElement.style.transform = `translateY(${thumbTop}px)`
+    }
+
+    updateThumb()
+    descriptionElement.addEventListener("scroll", updateThumb, { passive: true })
+    window.addEventListener("resize", updateThumb)
+
+    let resizeObserver: ResizeObserver | null = null
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(updateThumb)
+      resizeObserver.observe(descriptionElement)
+    }
+
+    return () => {
+      descriptionElement.removeEventListener("scroll", updateThumb)
+      window.removeEventListener("resize", updateThumb)
+      if (resizeObserver !== null) {
+        resizeObserver.disconnect()
+      }
+    }
+  }, [windowContainerProps.description])
+
   return (
     <WindowContainer
       hasWindowControl
@@ -45,7 +105,14 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
             ))}
           </div>
 
-          <p className={styles.description}>{windowContainerProps.description}</p>
+          <div className={styles.content}>
+            <p ref={descriptionRef} className={styles.description}>
+              {windowContainerProps.description}
+            </p>
+            <div className={styles.scrollbar}>
+              <div ref={thumbRef} className={styles.thumb} />
+            </div>
+          </div>
 
           <div className={styles.links}>
             {windowContainerProps.referenceLinks.map((link, index) => (

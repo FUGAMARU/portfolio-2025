@@ -13,5 +13,7 @@
   --color-use-case-window-control-close: #fe5f57;
   --color-use-case-window-control-minimize: #ffcc01;
   --color-use-case-window-control-maximize: #35c759;
+  --color-use-case-scrollbar-track: rgb(255 255 255 / 20%);
+  --color-use-case-scrollbar-thumb: rgb(255 255 255 / 70%);
   --gradient-use-case-badge: linear-gradient(to bottom, #606060 0%, #262525 100%);
 }

@@ -1,92 +1,94 @@
 /* TODO: 仮あて */
 .workDetailWindow {
   display: flex;
-  gap: 20px;
-  width: 950px;
-  padding-top: 8px;
+  gap: 1.25rem;
+  width: 59.375rem;
+  padding-top: 0.5rem;
 
   > .preview {
     display: grid;
     flex-shrink: 0;
     place-items: center;
-    width: 500px;
+    width: 31.25rem;
 
     > .image {
       object-fit: contain;
-      border-radius: 8px;
+      border-radius: 0.5rem;
     }
   }
 
   > .info {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 1.125rem;
     align-items: center;
 
     > .logo {
-      height: 70px;
+      height: 4.375rem;
       object-fit: contain;
     }
 
     > .tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 0.5rem;
 
       > .tag {
         display: inline-block;
-        padding: 4px 8px;
-        font-size: 12px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
         border: solid 1px var(--color-general-white);
-        border-radius: 8px;
+        border-radius: 0.5rem;
         text-box: trim-both cap alphabetic;
       }
     }
 
-    > .description {
-      max-height: 120px;
-      padding-right: 10px;
-      overflow-y: scroll;
-      font-size: 14px;
-      line-height: 1.5;
-      text-align: center;
-      word-break: break-all;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
+    > .content {
+      position: relative;
+      width: 100%;
 
-      /* Firefox用 */
-      scrollbar-color: rgb(255 255 255 / 60%) rgb(255 255 255 / 20%);
-      scrollbar-width: thin;
+      > .description {
+        max-height: 7.5rem;
+        padding-right: 0.75rem;
+        overflow-y: auto;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        text-align: center;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
 
-      /* カスタムスクロールバー - 強制表示 */
-      &::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
+        /* ネイティブスクロールバーを隠す */
+        scrollbar-width: none; /* Firefox */
+        &::-webkit-scrollbar {
+          display: none; /* WebKit/Chromium */
+        }
       }
 
-      &::-webkit-scrollbar-track {
-        background: rgb(255 255 255 / 20%);
-        border-radius: 20px;
-      }
+      > .scrollbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        width: 0.3125rem;
+        height: 100%;
+        pointer-events: none;
+        background: var(--color-use-case-scrollbar-track);
+        border-radius: 1.25rem;
 
-      &::-webkit-scrollbar-thumb {
-        min-height: 20px; /* 最小の高さを保証 */
-        background: rgb(255 255 255 / 60%);
-        border-radius: 20px;
-      }
-
-      &::-webkit-scrollbar-thumb:hover {
-        background: rgb(255 255 255 / 80%);
-      }
-
-      &::-webkit-scrollbar-thumb:active {
-        background: rgb(255 255 255 / 90%);
+        > .thumb {
+          position: absolute;
+          left: 0;
+          width: 100%;
+          background-color: var(--color-use-case-scrollbar-thumb);
+          border-radius: 1.25rem;
+          transition: background-color 120ms ease;
+        }
       }
     }
 
     > .links {
       display: flex;
-      gap: 16px;
+      gap: 1rem;
     }
   }
 }
