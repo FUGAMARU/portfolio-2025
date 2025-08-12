@@ -6,7 +6,7 @@ export const PauseIcon = () => {
         d="M6.66669 5V15M13.3334 5V15"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="2"
+        strokeWidth="1.1"
       />
     </svg>
   )

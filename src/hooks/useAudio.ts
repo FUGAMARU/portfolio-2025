@@ -1,30 +1,38 @@
 import { shuffle } from "es-toolkit"
-import { useSetAtom } from "jotai"
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useEffect, useRef, useMemo, useCallback } from "react"
 
-import { audioAtom } from "@/stores/audioAtoms"
+import {
+  playbackProgressAtom,
+  playbackStateAtom,
+  playlistAtom,
+  audioTrackIndexAtom,
+  audioControlsAtom
+} from "@/stores/audioAtoms"
 
 import type { ApiResponse } from "@/hooks/useDataFetch"
 import type { YouTubeEvent, YouTubePlayer } from "react-youtube"
 
 /** オーディオ再生用カスタムフック */
 export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
-  // APIレスポンスデーター関連
+  // APIレスポンスデータ関連
   const shuffledBgmData = useMemo(() => shuffle(apiResponseBgmData), [apiResponseBgmData])
-  const youtubeIdList = useMemo(() => shuffledBgmData.map(bgm => bgm.youtubeId), [shuffledBgmData])
+  const [playlist, setPlaylist] = useAtom(playlistAtom)
+  const youtubeIdList = useMemo(() => playlist.map(bgm => bgm.youtubeId), [playlist])
 
   // 再生ステータス関連
-  const [currentTime, setCurrentTime] = useState(0)
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
+  const setPlaybackProgress = useSetAtom(playbackProgressAtom)
+  const [currentTrackIndex, setCurrentTrackIndex] = useAtom(audioTrackIndexAtom)
   const currentYoutubeId = useMemo(
     () => youtubeIdList[currentTrackIndex],
     [youtubeIdList, currentTrackIndex]
   )
 
   // プレイヤー関連
-  const setAudio = useSetAtom(audioAtom)
-  const [playbackState, setPlaybackState] = useState(-1)
-  const playbackHistoryRef = useRef<Array<number>>([])
+  // currentTrack は導出されるため setter は不要
+  const setAudioControls = useSetAtom(audioControlsAtom)
+  const setPlaybackState = useSetAtom(playbackStateAtom)
+  const playbackState = useAtomValue(playbackStateAtom)
   const playerRef = useRef<YouTubePlayer>(null)
 
   /** 再生準備が完了した時の処理 */
@@ -34,66 +42,95 @@ export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
   }
 
   /** 再生ボタンを押下した時の処理 */
-  const handlePlayButtonClick = () => {
+  const handlePlayButtonClick = useCallback(() => {
     const player = playerRef.current
 
     if (player === null) {
       return
     }
 
-    player.playVideo()
-  }
+    if (playbackState === 0) {
+      if (currentYoutubeId !== undefined) {
+        player.loadVideoById(currentYoutubeId)
+      } else {
+        player.playVideo()
+      }
+    } else {
+      player.playVideo()
+    }
+  }, [currentYoutubeId, playbackState])
 
-  /** 再生終了した時の処理 */
-  const handleTrackEnd = () => {
+  /** 一時停止ボタンを押下した時の処理 */
+  const handlePauseButtonClick = useCallback(() => {
+    const player = playerRef.current
+
+    if (player === null) {
+      return
+    }
+
+    player.pauseVideo()
+  }, [])
+
+  /** 次のトラックに遷移する処理 */
+  const goToNextTrack = useCallback(() => {
     const nextTrackIndex =
       currentTrackIndex === youtubeIdList.length - 1 ? 0 : currentTrackIndex + 1
 
     setCurrentTrackIndex(nextTrackIndex)
 
     const player = playerRef.current
-
-    if (player === null) {
-      return
+    if (player !== null) {
+      player.loadVideoById(youtubeIdList[nextTrackIndex])
+      player.playVideo()
     }
-
-    player.loadVideoById(youtubeIdList[nextTrackIndex])
-    player.playVideo()
-  }
+  }, [currentTrackIndex, youtubeIdList, setCurrentTrackIndex])
 
   /** 再生状態が変更された時の処理 */
-  const handlePlaybackStateChange = (event: YouTubeEvent) => {
-    playbackHistoryRef.current = [playbackState, ...playbackHistoryRef.current.slice(0, 1)]
+  const handlePlaybackStateChange = useCallback(
+    (event: YouTubeEvent) => {
+      setPlaybackState(event.data)
+    },
+    [setPlaybackState]
+  )
 
-    if (
-      (playbackHistoryRef.current[0] === -1 || playbackHistoryRef.current[1] === -1) &&
-      event.data === 1
-    ) {
-      setAudio(shuffledBgmData[currentTrackIndex])
+  // プレイリストを初期化
+  useEffect(() => {
+    if (playlist.length === 0 && shuffledBgmData.length > 0) {
+      setPlaylist(shuffledBgmData)
     }
+  }, [playlist.length, shuffledBgmData, setPlaylist])
 
-    setPlaybackState(event.data)
-  }
+  // 再生コントロールを公開
+  useEffect(() => {
+    setAudioControls({
+      play: handlePlayButtonClick,
+      pause: handlePauseButtonClick,
+      next: goToNextTrack
+    })
+  }, [setAudioControls, handlePlayButtonClick, handlePauseButtonClick, goToNextTrack])
 
+  // 再生位置を更新
   useEffect(() => {
     const interval = setInterval(async () => {
       const player = playerRef.current
       const currentTime = await player?.getCurrentTime()
+      const duration = await player?.getDuration?.()
 
-      if (player === null || currentTime === undefined) {
+      if (player === null || currentTime === undefined || typeof duration !== "number") {
         return
       }
 
-      setCurrentTime(currentTime) // TypeScript的にはnumberになっているがundefinedが返ってくることがある
+      const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0
+      setPlaybackProgress(progress)
     }, 100)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [setPlaybackProgress])
 
   return {
     handleReady,
     handlePlayButtonClick,
-    handleTrackEnd,
+    goToNextTrack,
     handlePlaybackStateChange,
     currentYoutubeId
   }

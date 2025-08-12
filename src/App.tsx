@@ -14,7 +14,7 @@ export const App = () => {
   const {
     handleReady,
     handlePlayButtonClick,
-    handleTrackEnd,
+    goToNextTrack,
     handlePlaybackStateChange,
     currentYoutubeId
   } = useAudio(apiResponse?.bgm ?? [])
@@ -74,7 +74,7 @@ export const App = () => {
 
       <div className={styles.youtube}>
         <YouTube
-          onEnd={handleTrackEnd}
+          onEnd={goToNextTrack}
           onReady={handleReady}
           onStateChange={handlePlaybackStateChange}
           opts={{
