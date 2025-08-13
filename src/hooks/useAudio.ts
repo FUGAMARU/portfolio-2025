@@ -32,7 +32,10 @@ const getNextTrackIndex = (currentIndex: number, listLength: number): number => 
   return (currentIndex + 1) % listLength
 }
 
-/** オーディオ再生用カスタムフック */
+/**
+ * オーディオ再生用カスタムフック
+ * App.tsxからPlayerWindowまでAtomを使わずにPropsでデーターを伝搬するとMainViewを経由することになるが、MainViewは要素が多くレンダリングコストが高めなのでAtomを使うことによってMainViewを経由せずにPlayerWindowに直接データーを伝搬している。
+ */
 export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
   // APIレスポンスデータ関連
   const shuffledBgmData = useMemo(() => shuffle(apiResponseBgmData), [apiResponseBgmData])
