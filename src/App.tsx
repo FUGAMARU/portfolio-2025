@@ -8,7 +8,7 @@ import { WelcomeView } from "@/components/views/WelcomeView"
 import { useAudio } from "@/hooks/useAudio"
 import { useDataFetch } from "@/hooks/useDataFetch"
 import { useViewSwitch } from "@/hooks/useViewSwitch"
-import { audioIsPlayingAtom, playbackProgressAtom } from "@/stores/audioAtoms"
+import { isAudioPlayingAtom, playbackProgressAtom } from "@/stores/audioAtoms"
 
 /** App */
 export const App = () => {
@@ -23,7 +23,7 @@ export const App = () => {
 
   const [isMuted, setIsMuted] = useState<boolean>()
   const progressPercent = useAtomValue(playbackProgressAtom)
-  const isPlaying = useAtomValue(audioIsPlayingAtom)
+  const isPlaying = useAtomValue(isAudioPlayingAtom)
   const { showWelcome, isPlayButtonShowsSpinner, welcomeRef, mainRef, onPlayClick } = useViewSwitch(
     {
       isMuted,

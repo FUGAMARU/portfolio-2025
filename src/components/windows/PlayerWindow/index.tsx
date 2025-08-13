@@ -8,7 +8,7 @@ import { PlayIcon } from "@/components/windows/PlayerWindow/PlayIcon"
 import {
   currentTrackAtom,
   audioControlsAtom,
-  audioIsPlayingAtom,
+  isAudioPlayingAtom,
   playbackProgressAtom,
   currentTrackThemeColorAtom
 } from "@/stores/audioAtoms"
@@ -18,7 +18,7 @@ export const PlayerWindow = () => {
   const trackInfo = useAtomValue(currentTrackAtom)
   const progressPercent = useAtomValue(playbackProgressAtom)
   const audioControls = useAtomValue(audioControlsAtom)
-  const isPlaying = useAtomValue(audioIsPlayingAtom)
+  const isPlaying = useAtomValue(isAudioPlayingAtom)
   const themeColor = useAtomValue(currentTrackThemeColorAtom)
 
   return (

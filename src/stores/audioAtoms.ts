@@ -43,8 +43,15 @@ export const audioControlsAtom = atom<
   | undefined
 >()
 
-/** 再生中フラグ */
-export const audioIsPlayingAtom = atom<boolean>(get => get(playbackStateAtom) === 1)
+/**
+ * 再生中フラグ（UIアイコン制御用）
+ * YouTubeの状態 1: playing に加え、3: buffering 中も再生継続扱いとして true を返す。
+ * これにより再生再開直後の一瞬の buffering でアイコンが Play に戻る問題を防ぐ。
+ */
+export const isAudioPlayingAtom = atom<boolean>(get => {
+  const state = get(playbackStateAtom)
+  return state === 1 || state === 3
+})
 
 /** 楽曲ごとのテーマカラー（key: youtubeId, value: HEX） */
 export const artworkThemeColorMapAtom = atom<Record<string, string>>({})
