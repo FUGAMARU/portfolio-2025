@@ -2,17 +2,14 @@ import { WorkButton } from "@/components/parts/button/WorkButton"
 import styles from "@/components/widgets/WorksWidget/index.module.css"
 import { getResourceUrl } from "@/utils"
 
+import type { Work } from "@/hooks/useDataFetch"
+
 /** Props */
 type Props = {
   /** 作品ボタンを押下したときの処理 */
   onWorkButtonClick: (workId: string) => void
   /** 作品データ */
-  worksData: Array<{
-    /** 作品ID */
-    id: string
-    /** ボタン表示用の画像 */
-    buttonImage: string
-  }>
+  worksData: Array<Pick<Work, "id" | "buttonImage">>
 }
 
 /** 制作物一覧表示用ウィジェット */

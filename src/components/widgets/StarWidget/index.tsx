@@ -4,7 +4,6 @@ import { CenterStarIcon } from "@/components/widgets/StarWidget/CenterStarIcon"
 import styles from "@/components/widgets/StarWidget/index.module.css"
 import { LeftStarIcon } from "@/components/widgets/StarWidget/LeftStarIcon"
 import { RightStarIcon } from "@/components/widgets/StarWidget/RightStarIcon"
-import { getResourceUrl } from "@/utils"
 
 /**
  * 2桁ゼロ埋め
@@ -41,54 +40,43 @@ const formatDatetime = (isoString: string): string => {
   return `${year}-${month}-${day} ${hh}:${minutes}:${seconds} ${suffix}`
 }
 
-/**
- * サーバから現在時刻を取得する
- *
- * @returns ISO形式の現在時刻文字列
- */
-const fetchServerTime = async (): Promise<string> => {
-  const response = await fetch(getResourceUrl("/time"))
-  if (!response.ok) {
-    return new Date().toISOString()
-  }
-  const rawText = (await response.text()).trim()
-  const iso = rawText.replace(/^"|"$/g, "")
-  return iso !== "" ? iso : new Date().toISOString()
+/** Props */
+type Props = {
+  /** サーバーの現在時刻 */
+  currentServerTime?: string
 }
 
 /** 星アイコンのウィジェット */
-export const StarWidget = () => {
+export const StarWidget = ({ currentServerTime }: Props) => {
   const [displayTime, setDisplayTime] = useState<string>("")
 
   useEffect(() => {
+    if (currentServerTime === undefined) {
+      return
+    }
+
     let isDisposed = false
-    let intervalId: ReturnType<typeof setInterval> | undefined
-    ;(async () => {
-      const serverIso = await fetchServerTime()
-      const baseServerMs = new Date(serverIso).getTime()
-      const baseClientMs = Date.now()
+    const baseServerMs = new Date(currentServerTime).getTime()
+    const baseClientMs = Date.now()
 
-      /** 表示日時の更新 */
-      const updateDisplayTime = () => {
-        if (isDisposed) {
-          return
-        }
-        const elapsed = Date.now() - baseClientMs
-        const currentMs = baseServerMs + elapsed
-        setDisplayTime(formatDatetime(new Date(currentMs).toISOString()))
+    /** 表示日時の更新 */
+    const updateDisplayTime = () => {
+      if (isDisposed) {
+        return
       }
+      const elapsed = Date.now() - baseClientMs
+      const currentMs = baseServerMs + elapsed
+      setDisplayTime(formatDatetime(new Date(currentMs).toISOString()))
+    }
 
-      updateDisplayTime()
-      intervalId = setInterval(updateDisplayTime, 1000)
-    })()
+    updateDisplayTime()
+    const intervalId = setInterval(updateDisplayTime, 1000)
 
     return () => {
       isDisposed = true
-      if (intervalId !== undefined) {
-        clearInterval(intervalId)
-      }
+      clearInterval(intervalId)
     }
-  }, [])
+  }, [currentServerTime])
 
   return (
     <div className={styles.starWidget}>

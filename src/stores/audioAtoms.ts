@@ -1,16 +1,16 @@
 import { atom } from "jotai"
 import { Vibrant } from "node-vibrant/browser"
 
-import type { ApiResponse } from "@/hooks/useDataFetch"
+import type { PortfolioData } from "@/hooks/useDataFetch"
 
 /** プレイリスト （シャッフル済み） */
-export const playlistAtom = atom<ApiResponse["bgm"]>([])
+export const playlistAtom = atom<PortfolioData["bgm"]>([])
 
 /** 現在のトラック位置 */
 export const audioTrackIndexAtom = atom<number>(0)
 
 /** 現在のトラック */
-export const currentTrackAtom = atom<ApiResponse["bgm"][number] | undefined>(get => {
+export const currentTrackAtom = atom<PortfolioData["bgm"][number] | undefined>(get => {
   const list = get(playlistAtom)
   const index = get(audioTrackIndexAtom)
   return list[index]

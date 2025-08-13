@@ -12,14 +12,14 @@ import { isAudioPlayingAtom, playbackProgressAtom } from "@/stores/audioAtoms"
 
 /** App */
 export const App = () => {
-  const { apiResponse } = useDataFetch()
+  const { portfolioData, currentServerTime } = useDataFetch()
   const {
     handleReady,
     handlePlayButtonClick,
     goToNextTrack,
     handlePlaybackStateChange,
     currentYoutubeId
-  } = useAudio(apiResponse?.bgm ?? [])
+  } = useAudio(portfolioData?.bgm ?? [])
 
   const [isMuted, setIsMuted] = useState<boolean>()
   const progressPercent = useAtomValue(playbackProgressAtom)
@@ -31,11 +31,11 @@ export const App = () => {
       startPlayback: handlePlayButtonClick,
       progressPercent,
       isPlaying,
-      canFadeOutWelcome: apiResponse !== undefined
+      canFadeOutWelcome: portfolioData !== undefined
     }
   )
 
-  const shouldShowWelcomeView = showWelcome || apiResponse === undefined
+  const shouldShowWelcomeView = showWelcome || portfolioData === undefined
   // WelcomeView完全終了後のみMainを出現させる
   const shouldStartAppear = !shouldShowWelcomeView
 
@@ -53,8 +53,8 @@ export const App = () => {
 
       <div ref={mainRef} style={{ visibility: shouldStartAppear ? "visible" : "hidden" }}>
         <MainView
-          apiResponse={apiResponse}
-          isMuted={isMuted ?? false}
+          currentServerTime={currentServerTime}
+          portfolioData={portfolioData}
           shouldRenderWindows={shouldStartAppear}
         />
       </div>

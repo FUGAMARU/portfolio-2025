@@ -9,13 +9,13 @@ import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
 import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
-import type { ApiResponse } from "@/hooks/useDataFetch"
+import type { PortfolioData } from "@/hooks/useDataFetch"
 import type { ComponentProps } from "react"
 
 /** Props */
 type Props = {
   /** 基本情報 */
-  basicInfo: ApiResponse["basicInfo"]
+  basicInfo: PortfolioData["basicInfo"]
 } & Pick<
   ComponentProps<typeof WindowContainer>,
   | "left"

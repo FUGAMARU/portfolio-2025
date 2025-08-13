@@ -25,8 +25,8 @@ export type Work = {
   }>
 }
 
-/** APIレスポンスデータの型定義 */
-export type ApiResponse = {
+/** APIレスポンスデータの型定義（ポートフォリオの全体データ） */
+export type PortfolioData = {
   /** 基本情報 */
   basicInfo: {
     /** 名前 */
@@ -74,27 +74,36 @@ export type ApiResponse = {
 
 /** データフェッチフック */
 export const useDataFetch = () => {
-  const [apiResponse, setApiResponse] = useState<ApiResponse>()
+  const [portfolioData, setPortfolioData] = useState<PortfolioData>()
+  const [currentServerTime, setCurrentServerTime] = useState<string>()
 
   useEffect(() => {
     /** データ取得関数 */
     const fetchData = async () => {
       try {
-        const response = await fetch(getResourceUrl("/"))
+        const [dataResponse, timeResponse] = await Promise.all([
+          fetch(getResourceUrl("/")),
+          fetch(getResourceUrl("/time"))
+        ])
 
-        if (!response.ok) {
-          throw new Error("データの取得に失敗しました")
+        if (!dataResponse.ok || !timeResponse.ok) {
+          throw new Error("API response not ok")
         }
 
-        const result: ApiResponse = await response.json()
-        setApiResponse(result)
-      } catch (error) {
-        console.error("エラー:", error)
+        const result: PortfolioData = await dataResponse.json()
+        setPortfolioData(result)
+
+        const rawText = (await timeResponse.text()).trim()
+        const iso = rawText.replace(/^"|"$/g, "")
+        setCurrentServerTime(iso)
+      } catch (e) {
+        console.error(e)
+        alert("APIにアクセスできませんでした")
       }
     }
 
     fetchData()
   }, [])
 
-  return { apiResponse } as const
+  return { portfolioData, currentServerTime } as const
 }

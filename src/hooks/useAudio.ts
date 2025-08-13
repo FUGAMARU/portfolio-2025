@@ -11,7 +11,7 @@ import {
 } from "@/stores/audioAtoms"
 import { populateArtworkThemeColorsAtom } from "@/stores/audioAtoms"
 
-import type { ApiResponse } from "@/hooks/useDataFetch"
+import type { PortfolioData } from "@/hooks/useDataFetch"
 import type { YouTubeEvent, YouTubePlayer } from "react-youtube"
 
 /** フェードの1ステップ間隔（ms） */
@@ -36,9 +36,9 @@ const getNextTrackIndex = (currentIndex: number, listLength: number): number => 
  * オーディオ再生用カスタムフック
  * App.tsxからPlayerWindowまでAtomを使わずにPropsでデーターを伝搬するとMainViewを経由することになるが、MainViewは要素が多くレンダリングコストが高めなのでAtomを使うことによってMainViewを経由せずにPlayerWindowに直接データーを伝搬している。
  */
-export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
+export const useAudio = (portfolioBgmData: PortfolioData["bgm"]) => {
   // APIレスポンスデータ関連
-  const shuffledBgmData = useMemo(() => shuffle(apiResponseBgmData), [apiResponseBgmData])
+  const shuffledBgmData = useMemo(() => shuffle(portfolioBgmData), [portfolioBgmData])
   const [playlist, setPlaylist] = useAtom(playlistAtom)
   const youtubeIdList = useMemo(() => playlist.map(bgm => bgm.youtubeId), [playlist])
 

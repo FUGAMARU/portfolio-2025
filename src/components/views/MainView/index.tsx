@@ -9,22 +9,24 @@ import { PlayerWindow } from "@/components/windows/PlayerWindow"
 import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
 import { useWindowManager, WINDOW_POSITION } from "@/hooks/useWindowManager"
 
-import type { ApiResponse } from "@/hooks/useDataFetch"
+import type { PortfolioData } from "@/hooks/useDataFetch"
 
 /** Props */
 type Props = {
-  /** ミュートしているかどうか */
-  isMuted: boolean
-  /** APIレスポンス */
-  apiResponse?: ApiResponse
+  /** ポートフォリオのデータ */
+  portfolioData?: PortfolioData
   /** Welcome表示中はウィンドウを描画しない */
   shouldRenderWindows?: boolean
+  /** サーバの現在時刻(ISO) */
+  currentServerTime?: string
 }
 
 /** メインビュー */
-export const MainView = ({ isMuted, apiResponse, shouldRenderWindows = true }: Props) => {
-  console.log(isMuted)
-
+export const MainView = ({
+  portfolioData,
+  shouldRenderWindows = true,
+  currentServerTime
+}: Props) => {
   const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =
     useWindowManager([
       // BasicInfoWindowを初期状態で開いておく
@@ -39,9 +41,9 @@ export const MainView = ({ isMuted, apiResponse, shouldRenderWindows = true }: P
       }
     ])
 
-  const visibleWorkDetailWindows = getVisibleWorkDetailWindows(apiResponse?.works ?? [])
+  const visibleWorkDetailWindows = getVisibleWorkDetailWindows(portfolioData?.works ?? [])
 
-  if (apiResponse === undefined) {
+  if (portfolioData === undefined) {
     return null
   }
 
@@ -59,12 +61,12 @@ export const MainView = ({ isMuted, apiResponse, shouldRenderWindows = true }: P
           shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
         )}
       >
-        <StarWidget />
+        <StarWidget currentServerTime={currentServerTime} />
       </div>
 
       {basicInfoWindow !== undefined && basicInfoWindow.isVisible && (
         <BasicInfoWindow
-          basicInfo={apiResponse.basicInfo}
+          basicInfo={portfolioData.basicInfo}
           bottom={basicInfoWindow.currentY === undefined ? 48 : undefined}
           isFullScreen={basicInfoWindow.isFullScreen ?? false}
           left={basicInfoWindow.currentX}
@@ -85,7 +87,7 @@ export const MainView = ({ isMuted, apiResponse, shouldRenderWindows = true }: P
           shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
         )}
       >
-        <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={apiResponse.works} />
+        <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={portfolioData.works} />
       </div>
 
       {shouldRenderWindows &&
