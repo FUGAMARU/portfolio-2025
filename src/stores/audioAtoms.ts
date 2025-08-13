@@ -1,8 +1,9 @@
 import { atom } from "jotai"
+import { Vibrant } from "node-vibrant/browser"
 
 import type { ApiResponse } from "@/hooks/useDataFetch"
 
-/** プレイリスト（シャッフル後） */
+/** プレイリスト （シャッフル済み） */
 export const playlistAtom = atom<ApiResponse["bgm"]>([])
 
 /** 現在のトラック位置 */
@@ -44,3 +45,36 @@ export const audioControlsAtom = atom<
 
 /** 再生中フラグ */
 export const audioIsPlayingAtom = atom<boolean>(get => get(playbackStateAtom) === 1)
+
+/** 楽曲ごとのテーマカラー（key: youtubeId, value: HEX） */
+export const artworkThemeColorMapAtom = atom<Record<string, string>>({})
+
+/** 再生中トラックのテーマカラー */
+export const currentTrackThemeColorAtom = atom<string | undefined>(get => {
+  const currentTrack = get(currentTrackAtom)
+  const colorMap = get(artworkThemeColorMapAtom)
+  if (currentTrack === undefined) {
+    return undefined
+  }
+  return colorMap[currentTrack.youtubeId]
+})
+
+/** プレイリストのアートワークからテーマカラーを抽出してartworkThemeColorMapAtomを更新する */
+export const populateArtworkThemeColorsAtom = atom(null, async (get, set) => {
+  const playlist = get(playlistAtom)
+  const existing = get(artworkThemeColorMapAtom)
+  const missing = playlist.filter(track => existing[track.youtubeId] === undefined)
+
+  if (missing.length === 0) {
+    return
+  }
+
+  const palettes = await Promise.all(missing.map(track => Vibrant.from(track.artwork).getPalette()))
+  const entries = missing.map((track, index) => {
+    const hex = palettes[index]?.Vibrant?.hex ?? "#a8a8a8"
+    return [track.youtubeId, hex]
+  })
+
+  const next = Object.fromEntries(entries)
+  set(artworkThemeColorMapAtom, { ...existing, ...next })
+})

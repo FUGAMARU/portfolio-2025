@@ -1,5 +1,5 @@
 import { shuffle } from "es-toolkit"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useRef, useMemo, useCallback } from "react"
 
 import {
@@ -9,6 +9,7 @@ import {
   audioTrackIndexAtom,
   audioControlsAtom
 } from "@/stores/audioAtoms"
+import { populateArtworkThemeColorsAtom } from "@/stores/audioAtoms"
 
 import type { ApiResponse } from "@/hooks/useDataFetch"
 import type { YouTubeEvent, YouTubePlayer } from "react-youtube"
@@ -31,9 +32,9 @@ export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
   // プレイヤー関連
   // currentTrack は導出されるため setter は不要
   const setAudioControls = useSetAtom(audioControlsAtom)
-  const setPlaybackState = useSetAtom(playbackStateAtom)
-  const playbackState = useAtomValue(playbackStateAtom)
+  const [playbackState, setPlaybackState] = useAtom(playbackStateAtom)
   const playerRef = useRef<YouTubePlayer>(null)
+  const populateArtworkThemeColors = useSetAtom(populateArtworkThemeColorsAtom)
 
   /** 再生準備が完了した時の処理 */
   const handleReady = (event: YouTubeEvent) => {
@@ -108,6 +109,14 @@ export const useAudio = (apiResponseBgmData: ApiResponse["bgm"]) => {
       next: goToNextTrack
     })
   }, [setAudioControls, handlePlayButtonClick, handlePauseButtonClick, goToNextTrack])
+
+  // プレイリストが用意できたらテーマカラーを事前計算
+  useEffect(() => {
+    if (playlist.length === 0) {
+      return
+    }
+    populateArtworkThemeColors()
+  }, [playlist, populateArtworkThemeColors])
 
   // 再生位置を更新
   useEffect(() => {

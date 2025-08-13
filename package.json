@@ -20,6 +20,7 @@
     "destyle.css": "^4.0.1",
     "es-toolkit": "^1.39.8",
     "jotai": "^2.13.0",
+    "node-vibrant": "^4.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-rnd": "^10.5.2",

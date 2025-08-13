@@ -9,7 +9,8 @@ import {
   currentTrackAtom,
   audioControlsAtom,
   audioIsPlayingAtom,
-  playbackProgressAtom
+  playbackProgressAtom,
+  currentTrackThemeColorAtom
 } from "@/stores/audioAtoms"
 
 /** プレイヤーウィンドウ */
@@ -18,10 +19,11 @@ export const PlayerWindow = () => {
   const progressPercent = useAtomValue(playbackProgressAtom)
   const audioControls = useAtomValue(audioControlsAtom)
   const isPlaying = useAtomValue(audioIsPlayingAtom)
+  const themeColor = useAtomValue(currentTrackThemeColorAtom)
 
   return (
     <div className={styles.playerWindow}>
-      <div className={styles.artwork}>
+      <div className={styles.artwork} style={{ backgroundColor: themeColor }}>
         <img className={styles.image} src={trackInfo?.artwork} />
       </div>
 
