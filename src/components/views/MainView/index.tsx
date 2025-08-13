@@ -47,14 +47,11 @@ export const MainView = ({ isMuted, apiResponse, shouldRenderWindows = true }: P
 
   return (
     <div className={styles.mainView}>
-      <div
-        className={clsx(
-          styles.status,
-          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
-        )}
-      >
-        <LoadingStatusWidget />
-      </div>
+      {shouldRenderWindows && (
+        <div className={clsx(styles.status, styles.AppearShown)}>
+          <LoadingStatusWidget />
+        </div>
+      )}
 
       <div
         className={clsx(
