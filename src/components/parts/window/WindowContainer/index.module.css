@@ -1,7 +1,8 @@
 .windowContainer {
   position: relative;
-  width: fit-content;
-  height: fit-content;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   padding: 32px;
   cursor: default;
   background-color: var(--color-use-case-window-background);
