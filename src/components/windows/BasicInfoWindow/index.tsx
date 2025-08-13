@@ -6,7 +6,7 @@ import { WindowContainer } from "@/components/parts/window/WindowContainer"
 import { CakeIcon } from "@/components/windows/BasicInfoWindow/CakeIcon"
 import styles from "@/components/windows/BasicInfoWindow/index.module.css"
 import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
-import { getUrl } from "@/utils"
+import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { ApiResponse } from "@/hooks/useDataFetch"
@@ -123,7 +123,7 @@ export const BasicInfoWindow = ({
                 key={badge.src}
                 height={badge.height}
                 href={badge.href}
-                src={getUrl(badge.src)}
+                src={getResourceUrl(badge.src)}
               />
             ))}
           </div>
@@ -133,7 +133,7 @@ export const BasicInfoWindow = ({
                 key={badge.src}
                 height={badge.height}
                 href={badge.href}
-                src={getUrl(badge.src)}
+                src={getResourceUrl(badge.src)}
               />
             ))}
           </div>

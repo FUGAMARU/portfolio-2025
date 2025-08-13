@@ -8,6 +8,6 @@
  * @param relativePath - 相対パス
  * @returns URL
  */
-export const getUrl = (relativePath: string): string => {
+export const getResourceUrl = (relativePath: string): string => {
   return new URL(relativePath, import.meta.env.VITE_API_ORIGIN).href
 }

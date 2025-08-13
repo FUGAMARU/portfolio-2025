@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
 import styles from "@/components/windows/WorkDetailWindow/index.module.css"
-import { getUrl } from "@/utils"
+import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { Work } from "@/hooks/useDataFetch"
@@ -90,12 +90,16 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
         <div className={styles.preview}>
           <img
             className={styles.image}
-            src={getUrl(windowContainerProps.previewImage)}
+            src={getResourceUrl(windowContainerProps.previewImage)}
             width={500}
           />
         </div>
         <div className={styles.info}>
-          <img className={styles.logo} height={70} src={getUrl(windowContainerProps.logoImage)} />
+          <img
+            className={styles.logo}
+            height={70}
+            src={getResourceUrl(windowContainerProps.logoImage)}
+          />
 
           <div className={styles.tags}>
             {windowContainerProps.tags.map((tag, index) => (

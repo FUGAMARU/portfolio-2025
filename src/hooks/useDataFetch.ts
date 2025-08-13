@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
 
+import { getResourceUrl } from "@/utils"
+
 /** 作品 */
 export type Work = {
   /** 作品ID */
@@ -78,7 +80,7 @@ export const useDataFetch = () => {
     /** データ取得関数 */
     const fetchData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_ORIGIN}/`)
+        const response = await fetch(getResourceUrl("/"))
 
         if (!response.ok) {
           throw new Error("データの取得に失敗しました")
