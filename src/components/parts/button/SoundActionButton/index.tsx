@@ -8,6 +8,13 @@ import { SoundOnIcon } from "@/components/parts/button/SoundActionButton/SoundOn
 
 import type { ComponentProps } from "react"
 
+/** スピナー切替時のフェードアニメーションのDuration（ms） */
+const FADE_DURATION_MS = 250
+/** 上記フェードアニメーションで使用するイージング */
+const EASING_EASE_OUT_QUAD = "easeOutQuad"
+/** 押下時のスクイーズを最低限維持する時間（ミリ秒） */
+const MIN_PRESSED_MS = 140
+
 /** Props */
 type Props = {
   /** 表示タイプ */
@@ -25,6 +32,9 @@ export const SoundActionButton = ({
   const iconRef = useRef<HTMLSpanElement | null>(null)
   const textRef = useRef<HTMLSpanElement | null>(null)
   const spinnerRef = useRef<HTMLSpanElement | null>(null)
+  const pressStartTimeRef = useRef<number>(0)
+  const releaseTimerRef = useRef<number | null>(null)
+  const [isPressed, setIsPressed] = useState<boolean>(false)
 
   const [isSpinnerOnly, setIsSpinnerOnly] = useState<boolean>(
     displayType === "on" && shouldShowSpinner
@@ -43,15 +53,24 @@ export const SoundActionButton = ({
 
     if (!was && now) {
       if (textRef.current !== null) {
-        animate(textRef.current, { opacity: [1, 0], duration: 250, easing: "easeOutQuad" })
+        animate(textRef.current, {
+          opacity: [1, 0],
+          duration: FADE_DURATION_MS,
+          easing: EASING_EASE_OUT_QUAD
+        })
       }
+
       if (iconRef.current !== null) {
-        animate(iconRef.current, { opacity: [1, 0], duration: 250, easing: "easeOutQuad" })
+        animate(iconRef.current, {
+          opacity: [1, 0],
+          duration: FADE_DURATION_MS,
+          easing: EASING_EASE_OUT_QUAD
+        })
       }
 
       const timer = window.setTimeout(() => {
         setIsSpinnerOnly(true)
-      }, 250)
+      }, FADE_DURATION_MS)
 
       return () => window.clearTimeout(timer)
     }
@@ -67,11 +86,58 @@ export const SoundActionButton = ({
     if (!isSpinnerOnly || displayType !== "on" || spinnerRef.current === null) {
       return
     }
-    animate(spinnerRef.current, { opacity: [0, 1], duration: 250, easing: "easeOutQuad" })
+    animate(spinnerRef.current, {
+      opacity: [0, 1],
+      duration: FADE_DURATION_MS,
+      easing: EASING_EASE_OUT_QUAD
+    })
   }, [isSpinnerOnly, displayType])
 
+  /** 押下開始（スクイーズ開始） */
+  const handlePressStart = () => {
+    if (releaseTimerRef.current !== null) {
+      window.clearTimeout(releaseTimerRef.current)
+      releaseTimerRef.current = null
+    }
+    pressStartTimeRef.current = performance.now()
+    setIsPressed(true)
+  }
+
+  /** 押下終了（最低表示時間を保証してスクイーズ解除） */
+  const handlePressEnd = () => {
+    const elapsed = performance.now() - pressStartTimeRef.current
+    const remaining = Math.max(0, MIN_PRESSED_MS - elapsed)
+
+    if (remaining <= 0) {
+      setIsPressed(false)
+      return
+    }
+
+    releaseTimerRef.current = window.setTimeout(() => {
+      setIsPressed(false)
+      releaseTimerRef.current = null
+    }, remaining)
+  }
+
+  // アンマウント時にタイマーをクリア
+  useEffect(() => {
+    return () => {
+      if (releaseTimerRef.current !== null) {
+        window.clearTimeout(releaseTimerRef.current)
+      }
+    }
+  }, [])
+
   return (
-    <button className={styles.soundActionButton} onClick={handleClick} type="button">
+    <button
+      className={clsx(styles.soundActionButton, isPressed && styles.Pressed)}
+      onClick={handleClick}
+      onPointerCancel={handlePressEnd}
+      onPointerDown={handlePressStart}
+      onPointerLeave={handlePressEnd}
+      onPointerUp={handlePressEnd}
+      type="button"
+    >
       {isSpinnerOnly ? (
         <span ref={spinnerRef} className={styles.loadingSpinner} />
       ) : (
