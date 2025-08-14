@@ -47,7 +47,7 @@
       width: 100%;
 
       > .description {
-        max-height: 7.5rem;
+        max-height: 7.25rem;
         padding-right: 0.75rem;
         overflow-y: auto;
         font-size: 0.875rem;
