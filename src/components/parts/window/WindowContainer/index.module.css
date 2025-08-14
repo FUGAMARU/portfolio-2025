@@ -6,8 +6,9 @@
   padding: 32px;
   cursor: default;
   background-color: var(--color-use-case-window-background);
-  border: solid 1px var(--color-use-case-window-border);
+  border: solid 1px var(--color-use-case-window-border-inner);
   border-radius: 20px;
+  box-shadow: 0 0 0 1px var(--color-use-case-window-border-outer);
   backdrop-filter: blur(4px);
   transition:
     opacity 0.45s ease,

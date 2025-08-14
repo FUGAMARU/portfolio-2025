@@ -6,7 +6,8 @@
   --color-general-pale-green: #a3eecc;
   --color-use-case-background: #010101;
   --color-use-case-window-background: rgb(64 64 64 / 50%);
-  --color-use-case-window-border: #484848;
+  --color-use-case-window-border-inner: #63656f;
+  --color-use-case-window-border-outer: #060708;
   --color-use-case-badge-border: #616161;
   --color-use-case-general-button-color: #beaa8e;
   --color-use-case-general-button-alpha-50: rgb(190 170 142 / 50%);
