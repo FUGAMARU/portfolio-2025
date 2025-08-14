@@ -6,34 +6,42 @@ import styles from "@/components/widgets/LoadingStatusWidget/index.module.css"
 
 const FULL_TEXT = "All content loaded successfully"
 
-/** ローディングステータスウィジェット */
-export const LoadingStatusWidget = () => {
-  const [hasCompletedTyping, setHasCompletedTyping] = useState(false)
-
+/**
+ * タイピングアニメーションを行うコンポーネント
+ * 表示タイミングを少し遅らせたいので子コンポに切り出してマウントタイミングをコントロールしている
+ */
+const TypingText = () => {
   const [typedText] = useTypewriter({
-    delaySpeed: 1500,
-    deleteSpeed: 50,
-    loop: 1,
     typeSpeed: 40,
     words: [FULL_TEXT]
   })
 
-  // 完了後はテキストを固定表示
-  const displayText = hasCompletedTyping ? FULL_TEXT : typedText
+  const hasCompletedTyping = typedText === FULL_TEXT
+
+  if (hasCompletedTyping) {
+    return <>{FULL_TEXT}</>
+  }
+
+  return (
+    <>
+      {typedText} <Cursor cursorStyle="|" />
+    </>
+  )
+}
+
+/** ローディングステータスウィジェット */
+export const LoadingStatusWidget = () => {
+  const [isReadyToStart, setIsReadyToStart] = useState(false)
 
   useEffect(() => {
-    if (hasCompletedTyping || typedText !== FULL_TEXT) {
-      return
-    }
+    const timerId = window.setTimeout(() => setIsReadyToStart(true), 500)
 
-    setHasCompletedTyping(true)
-  }, [typedText, hasCompletedTyping])
+    return () => window.clearTimeout(timerId)
+  }, [])
 
   return (
     <div className={styles.loadingStatusWidget}>
-      <span className={styles.text}>
-        {displayText} {hasCompletedTyping ? null : <Cursor cursorStyle="|" />}
-      </span>
+      <span className={styles.text}>{isReadyToStart ? <TypingText /> : null}</span>
       <span className={styles.icon}>
         <CheckMarkIcon />
       </span>
