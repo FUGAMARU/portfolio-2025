@@ -13,7 +13,6 @@
     width: 4rem;
     height: 4rem;
     padding: 0.125rem;
-    background-color: rgb(254 240 2 / 80%); /* TODO: 仮置きの値 */
     border-radius: 0.5rem;
 
     > .image {
@@ -97,7 +96,7 @@
         width: 100%;
         height: 0.125rem;
         overflow: hidden;
-        background-color: var(--color-general-gray);
+        background-color: var(--color-general-background-alpha);
         border-radius: 0.5rem;
 
         > .current {
