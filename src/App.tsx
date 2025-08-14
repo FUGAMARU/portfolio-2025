@@ -54,6 +54,7 @@ export const App = () => {
       <div ref={mainRef} style={{ visibility: shouldStartAppear ? "visible" : "hidden" }}>
         <MainView
           currentServerTime={currentServerTime}
+          isMuted={isMuted}
           portfolioData={portfolioData}
           shouldRenderWindows={shouldStartAppear}
         />

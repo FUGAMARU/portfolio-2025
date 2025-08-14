@@ -19,13 +19,16 @@ type Props = {
   shouldRenderWindows?: boolean
   /** サーバの現在時刻(ISO) */
   currentServerTime?: string
+  /** ミュートかどうか */
+  isMuted?: boolean
 }
 
 /** メインビュー */
 export const MainView = ({
   portfolioData,
   shouldRenderWindows = true,
-  currentServerTime
+  currentServerTime,
+  isMuted = false
 }: Props) => {
   const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =
     useWindowManager([
@@ -107,14 +110,16 @@ export const MainView = ({
         ))}
 
       {/** プレイヤーの方が上のレイヤーにある */}
-      <div
-        className={clsx(
-          styles.player,
-          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
-        )}
-      >
-        <PlayerWindow />
-      </div>
+      {!isMuted && (
+        <div
+          className={clsx(
+            styles.player,
+            shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
+          )}
+        >
+          <PlayerWindow />
+        </div>
+      )}
     </div>
   )
 }
