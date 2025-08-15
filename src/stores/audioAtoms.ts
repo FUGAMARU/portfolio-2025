@@ -53,6 +53,13 @@ export const isAudioPlayingAtom = atom<boolean>(get => {
   return state === 1 || state === 3
 })
 
+/**
+ * 外部リンク遷移によってBGMを一時停止した後、タブ復帰時に自動再生を再開すべきかどうかのフラグ
+ * - 外部リンククリック時、再生中であればtrueにセット (手動のタブ離脱やユーザー操作による一時停止ではフラグは立たない)
+ * - visibilitychange で visible になった時、このフラグがtrueならBGMの再生を再開しfalseに戻す
+ */
+export const shouldResumeAfterVisibilityReturnAtom = atom<boolean>(false)
+
 /** 楽曲ごとのテーマカラー（key: youtubeId, value: HEX） */
 export const artworkThemeColorMapAtom = atom<Record<string, string>>({})
 

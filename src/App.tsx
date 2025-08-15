@@ -1,5 +1,6 @@
 import { useAtomValue } from "jotai"
-import { useState } from "react"
+import { useAtom } from "jotai"
+import { useState, useEffect } from "react"
 import YouTube from "react-youtube"
 
 import styles from "@/App.module.css"
@@ -8,7 +9,11 @@ import { WelcomeView } from "@/components/views/WelcomeView"
 import { useAudio } from "@/hooks/useAudio"
 import { useDataFetch } from "@/hooks/useDataFetch"
 import { useViewSwitch } from "@/hooks/useViewSwitch"
-import { isAudioPlayingAtom, playbackProgressAtom } from "@/stores/audioAtoms"
+import {
+  isAudioPlayingAtom,
+  playbackProgressAtom,
+  shouldResumeAfterVisibilityReturnAtom
+} from "@/stores/audioAtoms"
 
 /** App */
 export const App = () => {
@@ -38,6 +43,28 @@ export const App = () => {
   const shouldShowWelcomeView = showWelcome || portfolioData === undefined
   // WelcomeView完全終了後のみMainを出現させる
   const shouldStartAppear = !shouldShowWelcomeView
+
+  // 外部リンク遷移後にタブへ戻ったらBGMの再生を再開する
+  const [shouldResumeAfterVisibilityReturn, setShouldResumeAfterVisibilityReturn] = useAtom(
+    shouldResumeAfterVisibilityReturnAtom
+  )
+  useEffect(() => {
+    /** タブ復帰した時の処理 */
+    const handleVisibility = () => {
+      if (document.visibilityState !== "visible" || !shouldResumeAfterVisibilityReturn) {
+        return
+      }
+
+      handlePlayButtonClick()
+      setShouldResumeAfterVisibilityReturn(false)
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+    return () => document.removeEventListener("visibilitychange", handleVisibility)
+  }, [
+    shouldResumeAfterVisibilityReturn,
+    handlePlayButtonClick,
+    setShouldResumeAfterVisibilityReturn
+  ])
 
   return (
     <>
