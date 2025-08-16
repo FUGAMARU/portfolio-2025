@@ -5,7 +5,7 @@
   align-items: center;
   padding: 12px 16px;
   background-color: var(--color-use-case-window-background);
-  border: solid 1px var(--color-use-case-window-border-inner);
+  border: solid 1px var(--color-use-case-window-border);
   border-radius: 1.25rem;
   backdrop-filter: blur(0.25rem);
   will-change: backdrop-filter; /* Safari系最適化: will-changeで初期適用ラグを軽減 */
