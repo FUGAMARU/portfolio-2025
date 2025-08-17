@@ -84,13 +84,12 @@ export const MainView = ({
         />
       )}
 
-      <div
-        className={clsx(
-          styles.works,
-          shouldRenderWindows ? styles.AppearShown : styles.AppearHidden
-        )}
-      >
-        <WorksWidget onWorkButtonClick={handleWorkButtonClick} worksData={portfolioData.works} />
+      <div className={styles.works}>
+        <WorksWidget
+          onWorkButtonClick={handleWorkButtonClick}
+          shouldAppear={shouldRenderWindows}
+          worksData={portfolioData.works}
+        />
       </div>
 
       {shouldRenderWindows &&
