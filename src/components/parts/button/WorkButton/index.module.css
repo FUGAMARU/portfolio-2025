@@ -31,6 +31,7 @@
   > .icon {
     width: 50%;
     height: 50%;
+    margin-left: 3px;
     object-fit: cover;
   }
 }
