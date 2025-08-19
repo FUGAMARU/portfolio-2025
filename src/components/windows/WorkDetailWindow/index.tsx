@@ -18,7 +18,16 @@ type Props = Work &
   >
 
 /** 作品詳細ウィンドウ */
-export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: Props) => {
+export const WorkDetailWindow = ({
+  zIndex,
+  onFocus,
+  description,
+  previewImage,
+  logoImage,
+  tags,
+  referenceLinks,
+  ...windowContainerProps
+}: Props) => {
   const descriptionRef = useRef<HTMLParagraphElement | null>(null)
   const thumbRef = useRef<HTMLDivElement | null>(null)
 
@@ -36,19 +45,18 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
       const visibleHeight = descriptionElement.clientHeight
       const totalHeight = descriptionElement.scrollHeight
       const scrollTop = descriptionElement.scrollTop
-      const trackHeight = visibleHeight
 
-      if (totalHeight <= 0 || trackHeight <= 0) {
+      if (totalHeight <= 0 || visibleHeight <= 0) {
         return
       }
 
       const contentScrollable = totalHeight > visibleHeight
       const minThumbHeight = 24
       const calculatedThumbHeight = contentScrollable
-        ? Math.max((visibleHeight / totalHeight) * trackHeight, minThumbHeight)
-        : trackHeight
+        ? Math.max((visibleHeight / totalHeight) * visibleHeight, minThumbHeight)
+        : visibleHeight
 
-      const maxThumbTop = Math.max(trackHeight - calculatedThumbHeight, 0)
+      const maxThumbTop = Math.max(visibleHeight - calculatedThumbHeight, 0)
       const scrollProgress = contentScrollable
         ? scrollTop / Math.max(totalHeight - visibleHeight, 1)
         : 0
@@ -75,7 +83,7 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
         resizeObserver.disconnect()
       }
     }
-  }, [windowContainerProps.description])
+  }, [description])
 
   return (
     <WindowContainer
@@ -88,21 +96,13 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
     >
       <div className={styles.workDetailWindow}>
         <div className={styles.preview}>
-          <img
-            className={styles.image}
-            src={getResourceUrl(windowContainerProps.previewImage)}
-            width={500}
-          />
+          <img className={styles.image} src={getResourceUrl(previewImage)} width={500} />
         </div>
         <div className={styles.info}>
-          <img
-            className={styles.logo}
-            height={70}
-            src={getResourceUrl(windowContainerProps.logoImage)}
-          />
+          <img className={styles.logo} height={70} src={getResourceUrl(logoImage)} />
 
           <div className={styles.tags}>
-            {windowContainerProps.tags.map((tag, index) => (
+            {tags.map((tag, index) => (
               <span key={index} className={styles.tag}>
                 {tag}
               </span>
@@ -111,7 +111,7 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
 
           <div className={styles.content}>
             <p ref={descriptionRef} className={styles.description}>
-              {windowContainerProps.description}
+              {description}
             </p>
             <div className={styles.scrollbar}>
               <div ref={thumbRef} className={styles.thumb} />
@@ -119,7 +119,7 @@ export const WorkDetailWindow = ({ zIndex, onFocus, ...windowContainerProps }: P
           </div>
 
           <div className={styles.links}>
-            {windowContainerProps.referenceLinks.map((link, index) => (
+            {referenceLinks.map((link, index) => (
               <WorkLinkButton key={index} href={link.href} text={link.text} />
             ))}
           </div>
