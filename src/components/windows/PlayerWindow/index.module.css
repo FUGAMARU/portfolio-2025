@@ -130,11 +130,11 @@
     height: 20px;
     pointer-events: none;
     background-color: var(--color-use-case-player-window-close);
-    border: solid 1px var(--color-use-case-window-border-inner);
+    border: solid 1px var(--color-use-case-window-border);
     border-radius: 50%;
     opacity: 0;
     transform: translate(calc(-50% + var(--shift, 0%)), calc(-50% + var(--shift, 0%)));
-    transition: opacity 0.2s ease;
+    transition: opacity 0.4s ease;
 
     > .icon {
       display: block;
