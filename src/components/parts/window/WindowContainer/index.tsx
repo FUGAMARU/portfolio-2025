@@ -134,6 +134,7 @@ export const WindowContainer = ({
           styles.FullScreen,
           shouldAppear ? styles.AppearShown : styles.AppearHidden
         )}
+        style={{ pointerEvents: shouldAppear ? "auto" : "none" }}
       >
         {windowControlProps.hasWindowControl === true && (
           <div className={styles.control}>
@@ -149,10 +150,10 @@ export const WindowContainer = ({
     <Rnd
       ref={rndRef}
       default={{
-        x: 0,
-        y: 0,
+        height: "auto",
         width: "auto",
-        height: "auto"
+        x: 0,
+        y: 0
       }}
       disableDragging={!isInitialized || isFixed}
       enableResizing={!isFixed}
@@ -163,7 +164,8 @@ export const WindowContainer = ({
       }}
       style={{
         visibility: isInitialized ? "visible" : "hidden",
-        zIndex: zIndex ?? "auto"
+        zIndex: zIndex ?? "auto",
+        pointerEvents: shouldAppear ? "auto" : "none"
       }}
     >
       <div

@@ -27,6 +27,7 @@
       width: auto;
       max-width: 100%;
       height: 4.375rem;
+      padding: 0 2rem;
       object-fit: contain;
     }
 
