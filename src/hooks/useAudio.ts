@@ -20,6 +20,8 @@ const FADE_TICK_INTERVAL_MS = 20
 const DEFAULT_FADE_DURATION_MS = 400
 /** 再生位置の更新頻度（ms） */
 const PLAYBACK_PROGRESS_INTERVAL_MS = 100
+/** フェードイン完了時の目標音量（0-100） */
+const INTENDED_VOLUME = 100
 
 /**
  * 次トラックのインデックスを求める
@@ -57,7 +59,6 @@ export const useAudio = (portfolioBgmData: PortfolioData["bgm"]) => {
   const populateArtworkThemeColors = useSetAtom(populateArtworkThemeColorsAtom)
 
   // 音量フェード管理 (フック内で完結しUIへ直接反映しない内部状態のためuseRefで保持)
-  const intendedVolumeRef = useRef<number>(100) // 目標音量（0-100）。フェードイン完了時の到達値
   const currentVolumeRef = useRef<number>(100) // 現在の実音量（0-100）。フェードの起点/途中値
   const fadeTimerRef = useRef<number | null>(null) // フェード用interval ID。停止判定に使用
   const pendingFadeInRef = useRef<boolean>(false) // 再生開始後にフェードインすべき状態か
@@ -136,7 +137,7 @@ export const useAudio = (portfolioBgmData: PortfolioData["bgm"]) => {
     isPausingRef.current = false
     pendingFadeInRef.current = false
     clearFadeTimer()
-    setPlayerVolume(intendedVolumeRef.current)
+    setPlayerVolume(INTENDED_VOLUME)
   }, [clearFadeTimer, setPlayerVolume])
 
   /** 再生準備が完了した時の処理 */
@@ -228,7 +229,7 @@ export const useAudio = (portfolioBgmData: PortfolioData["bgm"]) => {
       // 再生が開始されたらフェードイン
       if (event.data === 1 && pendingFadeInRef.current) {
         pendingFadeInRef.current = false
-        fadeTo(intendedVolumeRef.current)
+        fadeTo(INTENDED_VOLUME)
       }
     },
     [setPlaybackState, fadeTo]
