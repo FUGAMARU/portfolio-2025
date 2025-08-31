@@ -99,7 +99,7 @@ export const WorkDetailWindow = ({
           <img className={styles.image} src={getResourceUrl(previewImage)} width={500} />
         </div>
         <div className={styles.info}>
-          <img className={styles.logo} height={70} src={getResourceUrl(logoImage)} />
+          <img className={styles.logo} src={getResourceUrl(logoImage)} />
 
           <div className={styles.tags}>
             {tags.map((tag, index) => (
