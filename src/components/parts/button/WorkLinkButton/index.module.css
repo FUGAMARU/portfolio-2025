@@ -12,6 +12,7 @@
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--color-general-rich-yellow);
+    white-space: nowrap;
     text-box: trim-both cap alphabetic;
   }
 
