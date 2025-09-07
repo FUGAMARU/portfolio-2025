@@ -3,6 +3,16 @@ import { Vibrant } from "node-vibrant/browser"
 
 import type { PortfolioData } from "@/hooks/useDataFetch"
 
+/** YouTubeプレイヤーの状態 */
+export const YouTubePlayerState = {
+  UNSTARTED: -1,
+  ENDED: 0,
+  PLAYING: 1,
+  PAUSED: 2,
+  BUFFERING: 3,
+  CUED: 5
+} as const
+
 /** プレイリスト （シャッフル済み） */
 export const playlistAtom = atom<PortfolioData["bgm"]>([])
 
@@ -19,16 +29,10 @@ export const currentTrackAtom = atom<PortfolioData["bgm"][number] | undefined>(g
 /** 再生位置（0-100%） */
 export const playbackProgressAtom = atom<number>(0)
 
-/**
- * YouTube の再生状態
- * - -1: unstarted
- * - 0: ended
- * - 1: playing
- * - 2: paused
- * - 3: buffering
- * - 5: video cued
- */
-export const playbackStateAtom = atom<number>(-1)
+/** YouTube の再生状態 */
+export const playbackStateAtom = atom<(typeof YouTubePlayerState)[keyof typeof YouTubePlayerState]>(
+  YouTubePlayerState.UNSTARTED
+)
 
 /** 再生コントロール */
 export const audioControlsAtom = atom<
@@ -50,7 +54,7 @@ export const audioControlsAtom = atom<
  */
 export const isAudioPlayingAtom = atom<boolean>(get => {
   const state = get(playbackStateAtom)
-  return state === 1 || state === 3
+  return state === YouTubePlayerState.PLAYING || state === YouTubePlayerState.BUFFERING
 })
 
 /**

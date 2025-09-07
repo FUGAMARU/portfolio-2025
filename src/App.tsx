@@ -6,7 +6,7 @@ import YouTube from "react-youtube"
 import styles from "@/App.module.css"
 import { MainView } from "@/components/views/MainView"
 import { WelcomeView } from "@/components/views/WelcomeView"
-import { useAudio } from "@/hooks/useAudio"
+import { useAudio } from "@/hooks/useAudio/index.hook"
 import { useDataFetch } from "@/hooks/useDataFetch"
 import { useViewSwitch } from "@/hooks/useViewSwitch"
 import {
