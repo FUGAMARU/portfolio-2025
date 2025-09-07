@@ -12,6 +12,8 @@ export type Work = {
   previewImage: string
   /** ロゴ画像 */
   logoImage: string
+  /** ロゴ画像拡大率 */
+  logoScale?: number
   /** タグ一覧 */
   tags: Array<string>
   /** 説明文 */
