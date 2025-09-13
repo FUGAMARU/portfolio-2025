@@ -7,6 +7,13 @@
   background-color: var(--color-use-case-general-button-alpha-50);
   border: solid 1px var(--color-use-case-general-button-color);
   border-radius: 0.5rem;
+  transition: transform 160ms ease;
+  will-change: transform;
+
+  &:hover,
+  &:focus-visible {
+    transform: scale(1.03);
+  }
 
   > .text {
     font-size: 0.875rem;

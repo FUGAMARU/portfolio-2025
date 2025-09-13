@@ -1,7 +1,6 @@
-import { Link } from "@/components/parts/Link"
-
 import { ExternalIcon } from "@/components/parts/button/WorkLinkButton/ExternalIcon"
 import styles from "@/components/parts/button/WorkLinkButton/index.module.css"
+import { Link } from "@/components/parts/Link"
 
 /** Props */
 type Props = {

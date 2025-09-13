@@ -7,4 +7,11 @@
   background: var(--gradient-use-case-badge);
   border: solid 1px var(--color-use-case-badge-border);
   border-radius: 8px;
+  transition: transform 160ms ease;
+  will-change: transform;
+
+  &:hover,
+  &:focus-visible {
+    transform: scale(1.03);
+  }
 }
