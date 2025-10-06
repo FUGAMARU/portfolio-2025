@@ -1,19 +1,23 @@
 .loadingStatusWidget {
+  --loading-status-font-size: 0.625rem;
+
   display: flex;
   gap: 0.125rem;
   align-items: center;
+  min-height: var(--loading-status-font-size); /* フォントサイズで固定 */
+  line-height: 1;
 
   > .text {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 0.625rem;
+    font-family: "x14y24pxHeadUpDaisy", monospace;
+    font-size: var(--loading-status-font-size);
+    line-height: 1;
     color: var(--color-general-pale-green);
-    text-box: trim-both cap alphabetic;
   }
 
   > .icon {
     display: inline-flex;
-    width: 0.625rem;
-    height: 0.625rem;
+    width: var(--loading-status-font-size);
+    height: var(--loading-status-font-size);
     line-height: 1;
     stroke: var(--color-general-pale-green);
   }

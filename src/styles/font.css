@@ -1,0 +1,7 @@
+@font-face {
+  font-family: "x14y24pxHeadUpDaisy";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/x14y24pxHeadUpDaisy-Subset.woff2") format("woff2");
+  font-display: swap;
+}
