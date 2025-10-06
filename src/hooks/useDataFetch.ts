@@ -83,21 +83,41 @@ export const useDataFetch = () => {
     /** データ取得関数 */
     const fetchData = async () => {
       try {
-        const [dataResponse, timeResponse] = await Promise.all([
-          fetch(getResourceUrl("/")),
-          fetch(getResourceUrl("/time"))
+        // 時刻だけは2回フェッチして最小RTTを採用
+        const t0a = performance.now()
+        const basicDataPromise = fetch(getResourceUrl("/"))
+        const timePromise1 = fetch(getResourceUrl("/time"), { cache: "no-store" })
+        const timePromise2 = fetch(getResourceUrl("/time"), { cache: "no-store" })
+        const [basicDataResponse, timeResponse1, timeResponse2] = await Promise.all([
+          basicDataPromise,
+          timePromise1,
+          timePromise2
         ])
 
-        if (!dataResponse.ok || !timeResponse.ok) {
+        if (!basicDataResponse.ok || !timeResponse1.ok || !timeResponse2.ok) {
           throw new Error("API response not ok")
         }
 
-        const result: PortfolioData = await dataResponse.json()
+        const result: PortfolioData = await basicDataResponse.json()
         setPortfolioData(result)
 
-        const rawText = (await timeResponse.text()).trim()
-        const iso = rawText.replace(/^"|"$/g, "")
-        setCurrentServerTime(iso)
+        // 取得できた2つの時刻レスポンスを計測し、RTTが最も小さい測定結果を採用
+
+        /** 時刻レスポンスを読み込み RTT/2補正後の『受信時点でのサーバー現在時刻』を算出する */
+        const measureServerTime = async (res: Response, startPerf: number) => {
+          const text = (await res.text()).trim().replace(/^"|"$/g, "")
+          const serverMs = new Date(text).getTime()
+          const endPerf = performance.now()
+          const rtt = endPerf - startPerf
+          const correctedCurrentMs = serverMs + rtt / 2
+          return { rtt, correctedCurrentMs }
+        }
+
+        const measurement1 = await measureServerTime(timeResponse1, t0a)
+        const measurement2Start = performance.now()
+        const measurement2 = await measureServerTime(timeResponse2, measurement2Start)
+        const best = measurement1.rtt <= measurement2.rtt ? measurement1 : measurement2
+        setCurrentServerTime(new Date(best.correctedCurrentMs).toISOString())
       } catch (e) {
         console.error(e)
         alert("APIにアクセスできませんでした")

@@ -31,7 +31,7 @@ const formatDatetime = (isoString: string): string => {
   const seconds = pad2(parsed.getSeconds())
   const isPm = hours >= 12
   const suffix = isPm ? "PM" : "AM"
-  hours = hours % 12
+  hours %= 12
   if (hours === 0) {
     hours = 12
   }
@@ -57,24 +57,32 @@ export const StarWidget = ({ currentServerTime }: Props) => {
 
     let isDisposed = false
     const baseServerMs = new Date(currentServerTime).getTime()
-    const baseClientMs = Date.now()
+    const basePerf = performance.now()
 
     /** 表示日時の更新 */
     const updateDisplayTime = () => {
       if (isDisposed) {
         return
       }
-      const elapsed = Date.now() - baseClientMs
+      const elapsed = performance.now() - basePerf
       const currentMs = baseServerMs + elapsed
       setDisplayTime(formatDatetime(new Date(currentMs).toISOString()))
     }
 
     updateDisplayTime()
-    const intervalId = setInterval(updateDisplayTime, 1000)
+
+    let rafId: number
+    /** アニメーションフレームごとに表示更新 */
+    const tick = () => {
+      updateDisplayTime()
+      rafId = requestAnimationFrame(tick)
+    }
+
+    rafId = requestAnimationFrame(tick)
 
     return () => {
       isDisposed = true
-      clearInterval(intervalId)
+      cancelAnimationFrame(rafId)
     }
   }, [currentServerTime])
 
