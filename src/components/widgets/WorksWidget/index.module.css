@@ -64,7 +64,7 @@
       border-radius: 50%;
       backdrop-filter: blur(8px);
       transform: translateY(-50%);
-      transition: background 0.2s ease;
+      transition: background 0.3s ease;
 
       &:disabled {
         background-color: var(--color-use-case-works-nav-button-disabled);
