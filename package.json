@@ -17,6 +17,7 @@
     "animejs": "^4.1.2",
     "clsx": "^2.1.1",
     "destyle.css": "^4.0.1",
+    "embla-carousel-react": "^8.6.0",
     "es-toolkit": "^1.39.8",
     "jotai": "^2.13.0",
     "node-vibrant": "^4.0.3",

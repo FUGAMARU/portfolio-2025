@@ -1,12 +1,91 @@
 .worksWidget {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  /* 1つの作品ボタンの一辺(px) */
+  --works-item-size: 100px;
 
-  > .item {
-    width: 100px;
-    aspect-ratio: 1;
+  /* グリッドセル間のギャップ(px) */
+  --works-grid-gap: 12px;
+
+  /* 1ページあたりの列数 */
+  --works-columns: 3;
+
+  /* 合計幅 */
+  --works-total-width: calc(
+    var(--works-item-size) * var(--works-columns) + var(--works-grid-gap) *
+      (var(--works-columns) - 1)
+  );
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+
+  > .wrapper {
+    position: relative;
+
+    > .viewport {
+      width: var(--works-total-width);
+      overflow: hidden;
+
+      > .track {
+        display: flex;
+
+        > .slide {
+          position: relative;
+          display: flex;
+          flex: 0 0 100%;
+          justify-content: center;
+          min-width: 0;
+          padding: 4px 0;
+
+          > .grid {
+            display: grid;
+            grid-template-columns: repeat(var(--works-columns), var(--works-item-size));
+            gap: var(--works-grid-gap);
+            width: var(--works-total-width);
+
+            > .item {
+              width: var(--works-item-size);
+              aspect-ratio: 1;
+            }
+          }
+        }
+      }
+    }
+
+    > .button {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      padding: 4px 10px;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid currentcolor;
+      border-radius: 4px;
+      transform: translateY(-50%);
+      transition:
+        background 0.2s ease,
+        opacity 0.2s ease;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.35;
+      }
+
+      &:not(:disabled):hover {
+        background: rgb(255 255 255 / 8%);
+      }
+
+      &.Prev {
+        left: -3.25rem;
+      }
+
+      &.Next {
+        right: -3.25rem;
+      }
+    }
   }
 
   > .windows {
@@ -14,10 +93,10 @@
     top: 0;
     left: 0;
     pointer-events: none;
-  }
 
-  > .windows > * {
-    pointer-events: auto;
+    > * {
+      pointer-events: auto;
+    }
   }
 }
 
