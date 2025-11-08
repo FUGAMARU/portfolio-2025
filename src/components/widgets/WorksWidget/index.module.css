@@ -20,7 +20,7 @@
   align-items: center;
   width: fit-content;
 
-  > .wrapper {
+  > .inner {
     position: relative;
 
     > .viewport {
@@ -56,34 +56,36 @@
     > .button {
       position: absolute;
       top: 50%;
-      z-index: 2;
-      padding: 4px 10px;
-      font: inherit;
-      color: inherit;
-      cursor: pointer;
-      background: transparent;
-      border: 1px solid currentcolor;
-      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      background-color: var(--color-use-case-works-nav-button);
+      border-radius: 50%;
+      backdrop-filter: blur(8px);
       transform: translateY(-50%);
-      transition:
-        background 0.2s ease,
-        opacity 0.2s ease;
+      transition: background 0.2s ease;
 
       &:disabled {
-        cursor: not-allowed;
-        opacity: 0.35;
-      }
-
-      &:not(:disabled):hover {
-        background: rgb(255 255 255 / 8%);
+        background-color: var(--color-use-case-works-nav-button-disabled);
       }
 
       &.Prev {
-        left: -3.25rem;
+        left: -58px;
       }
 
       &.Next {
-        right: -3.25rem;
+        right: -58px;
+      }
+
+      > .icon {
+        width: 32px;
+        height: 32px;
+        fill: var(--color-general-rich-yellow);
+
+        &.Next {
+          transform: rotate(180deg);
+        }
       }
     }
   }

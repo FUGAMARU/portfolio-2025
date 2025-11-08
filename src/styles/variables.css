@@ -11,6 +11,8 @@
   --color-use-case-badge-border: #616161;
   --color-use-case-general-button-color: #beaa8e;
   --color-use-case-general-button-alpha-50: rgb(190 170 142 / 50%);
+  --color-use-case-works-nav-button-disabled: rgb(255 235 208 / 20%);
+  --color-use-case-works-nav-button: rgb(255 235 208 / 40%);
   --color-use-case-window-control-close: #fe5f57;
   --color-use-case-window-control-minimize: #ffcc01;
   --color-use-case-window-control-maximize: #35c759;

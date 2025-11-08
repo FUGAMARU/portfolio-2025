@@ -3,6 +3,7 @@ import useEmblaCarousel from "embla-carousel-react"
 import { useEffect, useState } from "react"
 
 import { WorkButton } from "@/components/parts/button/WorkButton"
+import { ChevronIcon } from "@/components/widgets/WorksWidget/ChevronIcon"
 import styles from "@/components/widgets/WorksWidget/index.module.css"
 import { getResourceUrl } from "@/utils"
 
@@ -54,14 +55,14 @@ export const WorksWidget = ({
 
   return (
     <div className={styles.worksWidget}>
-      <div className={styles.wrapper}>
+      <div className={styles.inner}>
         <button
           className={clsx(styles.button, styles.Prev)}
           disabled={selectedIndex === 0}
           onClick={() => emblaApi?.scrollPrev()}
           type="button"
         >
-          Prev
+          <ChevronIcon className={styles.icon} />
         </button>
 
         <div ref={viewportRef} className={styles.viewport}>
@@ -91,7 +92,7 @@ export const WorksWidget = ({
           onClick={() => emblaApi?.scrollNext()}
           type="button"
         >
-          Next
+          <ChevronIcon className={clsx(styles.icon, styles.Next)} />
         </button>
       </div>
     </div>
