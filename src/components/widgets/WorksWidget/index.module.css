@@ -8,6 +8,9 @@
   /* 1ページあたりの列数 */
   --works-columns: 3;
 
+  /* ホバー時のscale/skewアニメで端が切れないように左右に持たせる余白(px) */
+  --works-bleed: 4px;
+
   /* 合計幅 */
   --works-total-width: calc(
     var(--works-item-size) * var(--works-columns) + var(--works-grid-gap) *
@@ -23,8 +26,16 @@
   > .inner {
     position: relative;
 
+    /*
+      左右ナビゲーションボタンをカルーセル本体の外側にどれだけ“突き出す”かを示す負方向オフセット(px)。
+      bleed(内部余白)が0のときの基準値。bleedを増減するときはこの負値にbleedを足して中心距離を維持する。
+    */
+    --works-nav-button-inline-offset: -58px;
+
     > .viewport {
-      width: var(--works-total-width);
+      box-sizing: content-box;
+      width: calc(var(--works-total-width) + var(--works-bleed) * 2);
+      padding: 0 var(--works-bleed);
       overflow: hidden;
 
       > .track {
@@ -72,11 +83,11 @@
       }
 
       &.Prev {
-        left: -58px;
+        left: calc(var(--works-nav-button-inline-offset) + var(--works-bleed));
       }
 
       &.Next {
-        right: -58px;
+        right: calc(var(--works-nav-button-inline-offset) + var(--works-bleed));
       }
 
       > .icon {

@@ -12,7 +12,8 @@
     10px 15px 10px rgb(0 0 0 / 10%),
     inset -5px -5px 10px rgb(255 255 255 / 70%);
   backdrop-filter: blur(2px);
-  will-change: backdrop-filter; /* Safari系最適化: will-changeで初期適用ラグを軽減 */
+  transform-origin: center;
+  will-change: backdrop-filter, transform; /* transform も事前最適化してアニメの初速ラグ軽減 */
 
   &:hover {
     animation: gel-animation 1.2s ease-out;
