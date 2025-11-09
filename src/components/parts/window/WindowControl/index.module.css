@@ -33,6 +33,10 @@
       > .icon > svg {
         --icon-scale: 0.7;
       }
+
+      &:active {
+        background-color: var(--color-use-case-window-control-close-mousedown);
+      }
     }
 
     &.Minimize {
@@ -41,6 +45,10 @@
       > .icon > svg {
         --icon-scale: 0.7;
       }
+
+      &:active {
+        background-color: var(--color-use-case-window-control-minimize-mousedown);
+      }
     }
 
     &.Maximize {
@@ -48,6 +56,10 @@
 
       > .icon > svg {
         --icon-scale: 0.4;
+      }
+
+      &:active {
+        background-color: var(--color-use-case-window-control-maximize-mousedown);
       }
     }
   }

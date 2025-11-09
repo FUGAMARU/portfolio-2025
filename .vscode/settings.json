@@ -9,5 +9,14 @@
     "source.fixAll.stylelint": "explicit"
   },
   "prettier.configPath": ".prettierrc.js",
-  "cSpell.ignoreWords": ["destyle", "anek", "seekbar", "frontmost", "fugamaru", "animejs", "embla"]
+  "cSpell.ignoreWords": [
+    "destyle",
+    "anek",
+    "seekbar",
+    "frontmost",
+    "fugamaru",
+    "animejs",
+    "embla",
+    "mousedown"
+  ]
 }
