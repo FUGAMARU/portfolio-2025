@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
+import windowContainerStyles from "@/components/parts/window/WindowContainer/index.module.css"
 import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 import { getResourceUrl } from "@/utils"
 
@@ -28,8 +29,38 @@ export const WorkDetailWindow = ({
   referenceLinks,
   ...windowContainerProps
 }: Props) => {
-  const descriptionRef = useRef<HTMLParagraphElement | null>(null)
-  const thumbRef = useRef<HTMLDivElement | null>(null)
+  const descriptionRef = useRef<HTMLParagraphElement>(null)
+  const thumbRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [windowScale, setWindowScale] = useState(1)
+
+  // WindowContainerの幅を基準に要素をスケール
+  useLayoutEffect(() => {
+    const rootElement = rootRef.current
+    if (rootElement === null) {
+      return
+    }
+
+    const windowElement = rootElement.closest(`.${windowContainerStyles.windowContainer}`)
+    if (windowElement === null) {
+      return
+    }
+
+    let baseWidth: number | undefined
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      const { width } = entry.contentRect
+      if (baseWidth === undefined) {
+        baseWidth = width
+        return
+      }
+      if (baseWidth > 0) {
+        setWindowScale(Math.max(1, width / baseWidth))
+      }
+    })
+    resizeObserver.observe(windowElement)
+
+    return () => resizeObserver.disconnect()
+  }, [])
 
   // macOSなどではオーバーレイスクロールバーが採用されており、ユーザーのシステム設定やOSの挙動により未操作時は非表示になる。
   // 今回はカスタムスクロールバーを常時表示させたいので、独自のトラック/サムを描写し、サムの位置やサイズを同期させるためにuseEffectでDOM計測とイベント購読を実装している。
@@ -94,9 +125,13 @@ export const WorkDetailWindow = ({
       zIndex={zIndex}
       {...windowContainerProps}
     >
-      <div className={styles.workDetailWindow}>
+      <div
+        ref={rootRef}
+        className={styles.workDetailWindow}
+        style={{ ["--window-scale" as string]: windowScale }}
+      >
         <div className={styles.preview}>
-          <img className={styles.image} src={getResourceUrl(previewImage)} width={500} />
+          <img className={styles.image} src={getResourceUrl(previewImage)} />
         </div>
         <div className={styles.info}>
           <img className={styles.logo} src={getResourceUrl(logoImage)} />

@@ -1,19 +1,24 @@
 .workDetailWindow {
   display: flex;
   gap: 1.25rem;
-  width: 59.375rem;
-  padding-top: 0.5rem;
+  width: calc(59.375rem * var(--window-scale));
+  padding-top: calc(0.5rem * var(--window-scale));
+
+  --window-scale: var(--window-scale, 1);
 
   > .preview {
     display: grid;
     flex-shrink: 0;
     place-items: center;
-    width: 31.25rem;
+    width: calc(32.5rem * var(--window-scale) - 1.25rem);
 
     > .image {
-      max-height: 17.5rem;
+      width: 100%;
+      max-width: calc(30rem * var(--window-scale));
+      height: auto;
+      max-height: calc(17.5rem * var(--window-scale));
       object-fit: contain;
-      border-radius: 0.5rem;
+      border-radius: calc(0.5rem * var(--window-scale));
     }
   }
 
@@ -38,10 +43,10 @@
 
       > .tag {
         display: inline-block;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
+        padding: calc(0.25rem * var(--window-scale)) calc(0.5rem * var(--window-scale));
+        font-size: calc(0.75rem * var(--window-scale));
         border: solid 1px var(--color-general-white);
-        border-radius: 0.5rem;
+        border-radius: calc(0.5rem * var(--window-scale));
         text-box: trim-both cap alphabetic;
       }
     }

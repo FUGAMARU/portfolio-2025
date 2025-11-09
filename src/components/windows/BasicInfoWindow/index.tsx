@@ -1,8 +1,9 @@
 import clsx from "clsx"
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 import { BadgeLinkButton } from "@/components/parts/button/BadgeLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
+import windowContainerStyles from "@/components/parts/window/WindowContainer/index.module.css"
 import { CakeIcon } from "@/components/windows/BasicInfoWindow/CakeIcon"
 import styles from "@/components/windows/BasicInfoWindow/index.module.css"
 import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
@@ -46,6 +47,35 @@ export const BasicInfoWindow = ({
 }: Props) => {
   const [shouldDisplay, setShouldDisplay] = useState(true)
   const [isFullScreen, setIsFullScreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [windowScale, setWindowScale] = useState(1)
+
+  // 初期幅を基準にWindow全体の拡大に追従してnameのサイズをスケールさせる
+  useLayoutEffect(() => {
+    const containerElement = containerRef.current
+    if (containerElement === null) {
+      return
+    }
+    const windowElement = containerElement.closest(`.${windowContainerStyles.windowContainer}`)
+    if (windowElement === null) {
+      return
+    }
+
+    let baseWidth: number | undefined
+    const observer = new ResizeObserver(([entry]) => {
+      const { width } = entry.contentRect
+      if (baseWidth === undefined) {
+        baseWidth = width
+        return
+      }
+      if (baseWidth > 0) {
+        setWindowScale(Math.max(1, width / baseWidth))
+      }
+    })
+    observer.observe(windowElement)
+
+    return () => observer.disconnect()
+  }, [])
 
   if (!shouldDisplay) {
     return null
@@ -97,7 +127,11 @@ export const BasicInfoWindow = ({
       top={top}
       zIndex={zIndex}
     >
-      <div className={styles.basicInfoWindow}>
+      <div
+        ref={containerRef}
+        className={styles.basicInfoWindow}
+        style={{ ["--window-scale" as string]: windowScale }}
+      >
         <h1 className={styles.name}>{basicInfo.name}</h1>
 
         <div className={styles.info}>

@@ -3,10 +3,14 @@
   flex-direction: column;
   width: fit-content;
 
+  --window-scale: var(--window-scale, 1);
+
   > .name {
     font-family: Urbanist, sans-serif;
-    font-size: 5rem;
+    font-size: calc(5rem * var(--window-scale));
     font-weight: 700;
+    line-height: 1; /* 行高さを固定してジャンプを抑制 */
+    white-space: nowrap; /* 縮小途中の一時的な折り返し防止 */
   }
 
   > .info {
@@ -19,7 +23,7 @@
 
     > .row {
       display: flex;
-      gap: 0.375rem;
+      gap: calc(0.375rem * var(--gap-scale));
       align-items: center;
 
       > .icon {
