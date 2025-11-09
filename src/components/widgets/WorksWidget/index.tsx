@@ -57,13 +57,15 @@ export const WorksWidget = ({
   return (
     <div className={styles.worksWidget}>
       <div className={styles.inner}>
-        <PushSqueezeButton
-          className={clsx(styles.button, styles.Prev, selectedIndex === 0 && styles.Disabled)}
-          disabled={selectedIndex === 0}
-          onClick={() => emblaApi?.scrollPrev()}
-        >
-          <ChevronIcon className={clsx(styles.icon, selectedIndex === 0 && styles.Disabled)} />
-        </PushSqueezeButton>
+        <div className={clsx(styles.button, styles.Prev, shouldAppear && styles.Shown)}>
+          <PushSqueezeButton
+            className={clsx(styles.main, selectedIndex === 0 && styles.Disabled)}
+            disabled={selectedIndex === 0}
+            onClick={() => emblaApi?.scrollPrev()}
+          >
+            <ChevronIcon className={clsx(styles.icon, selectedIndex === 0 && styles.Disabled)} />
+          </PushSqueezeButton>
+        </div>
 
         <div ref={viewportRef} className={styles.viewport}>
           <div className={styles.track}>
@@ -86,23 +88,21 @@ export const WorksWidget = ({
           </div>
         </div>
 
-        <PushSqueezeButton
-          className={clsx(
-            styles.button,
-            styles.Next,
-            selectedIndex === pages.length - 1 && styles.Disabled
-          )}
-          disabled={selectedIndex === pages.length - 1}
-          onClick={() => emblaApi?.scrollNext()}
-        >
-          <ChevronIcon
-            className={clsx(
-              styles.icon,
-              styles.Next,
-              selectedIndex === pages.length - 1 && styles.Disabled
-            )}
-          />
-        </PushSqueezeButton>
+        <div className={clsx(styles.button, styles.Next, shouldAppear && styles.Shown)}>
+          <PushSqueezeButton
+            className={clsx(styles.main, selectedIndex === pages.length - 1 && styles.Disabled)}
+            disabled={selectedIndex === pages.length - 1}
+            onClick={() => emblaApi?.scrollNext()}
+          >
+            <ChevronIcon
+              className={clsx(
+                styles.icon,
+                styles.Next,
+                selectedIndex === pages.length - 1 && styles.Disabled
+              )}
+            />
+          </PushSqueezeButton>
+        </div>
       </div>
     </div>
   )
