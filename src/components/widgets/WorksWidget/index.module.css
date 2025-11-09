@@ -54,20 +54,21 @@
     }
 
     > .button {
+      --base-transform: translateY(-50%);
+
       position: absolute;
       top: 50%;
       display: grid;
       place-items: center;
       width: 48px;
       height: 48px;
-      background-color: var(--color-use-case-works-nav-button);
+      background-color: var(--color-general-bitter-yellow-alpha-40);
       border-radius: 50%;
       backdrop-filter: blur(8px);
-      transform: translateY(-50%);
-      transition: background 0.3s ease;
+      transition: background 0.3s;
 
-      &:disabled {
-        background-color: var(--color-use-case-works-nav-button-disabled);
+      &.Disabled {
+        background-color: var(--color-general-bitter-yellow-alpha-30);
       }
 
       &.Prev {
@@ -82,38 +83,43 @@
         width: 32px;
         height: 32px;
         fill: var(--color-general-rich-yellow);
+        transition: fill 0.3s;
 
         &.Next {
           transform: rotate(180deg);
         }
+
+        &.Disabled {
+          fill: var(--color-general-rich-yellow-alpha-50);
+        }
+      }
+    }
+
+    > .windows {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+
+      > * {
+        pointer-events: auto;
       }
     }
   }
 
-  > .windows {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-
-    > * {
-      pointer-events: auto;
-    }
+  .AppearHidden {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.45s ease,
+      transform 0.45s ease;
   }
-}
 
-.AppearHidden {
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 0.45s ease,
-    transform 0.45s ease;
-}
-
-.AppearShown {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 0.45s ease,
-    transform 0.45s ease;
+  .AppearShown {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.45s ease,
+      transform 0.45s ease;
+  }
 }

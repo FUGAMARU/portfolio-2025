@@ -3,6 +3,7 @@ import useEmblaCarousel from "embla-carousel-react"
 import { useEffect, useState } from "react"
 
 import { WorkButton } from "@/components/parts/button/WorkButton"
+import { PushSqueezeButton } from "@/components/parts/PushSqueezeButton"
 import { ChevronIcon } from "@/components/widgets/WorksWidget/ChevronIcon"
 import styles from "@/components/widgets/WorksWidget/index.module.css"
 import { getResourceUrl } from "@/utils"
@@ -56,14 +57,13 @@ export const WorksWidget = ({
   return (
     <div className={styles.worksWidget}>
       <div className={styles.inner}>
-        <button
-          className={clsx(styles.button, styles.Prev)}
+        <PushSqueezeButton
+          className={clsx(styles.button, styles.Prev, selectedIndex === 0 && styles.Disabled)}
           disabled={selectedIndex === 0}
           onClick={() => emblaApi?.scrollPrev()}
-          type="button"
         >
-          <ChevronIcon className={styles.icon} />
-        </button>
+          <ChevronIcon className={clsx(styles.icon, selectedIndex === 0 && styles.Disabled)} />
+        </PushSqueezeButton>
 
         <div ref={viewportRef} className={styles.viewport}>
           <div className={styles.track}>
@@ -86,14 +86,23 @@ export const WorksWidget = ({
           </div>
         </div>
 
-        <button
-          className={clsx(styles.button, styles.Next)}
+        <PushSqueezeButton
+          className={clsx(
+            styles.button,
+            styles.Next,
+            selectedIndex === pages.length - 1 && styles.Disabled
+          )}
           disabled={selectedIndex === pages.length - 1}
           onClick={() => emblaApi?.scrollNext()}
-          type="button"
         >
-          <ChevronIcon className={clsx(styles.icon, styles.Next)} />
-        </button>
+          <ChevronIcon
+            className={clsx(
+              styles.icon,
+              styles.Next,
+              selectedIndex === pages.length - 1 && styles.Disabled
+            )}
+          />
+        </PushSqueezeButton>
       </div>
     </div>
   )

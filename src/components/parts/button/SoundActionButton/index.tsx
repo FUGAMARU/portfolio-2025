@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import styles from "@/components/parts/button/SoundActionButton/index.module.css"
 import { SoundOffIcon } from "@/components/parts/button/SoundActionButton/SoundOffIcon"
 import { SoundOnIcon } from "@/components/parts/button/SoundActionButton/SoundOnIcon"
+import { PushSqueezeButton } from "@/components/parts/PushSqueezeButton"
 
 import type { ComponentProps } from "react"
 
@@ -12,8 +13,6 @@ import type { ComponentProps } from "react"
 const FADE_DURATION_MS = 250
 /** 上記フェードアニメーションで使用するイージング */
 const EASING_EASE_OUT_QUAD = "easeOutQuad"
-/** 押下時のスクイーズを最低限維持する時間（ミリ秒） */
-const MIN_PRESSED_MS = 140
 
 /** Props */
 type Props = {
@@ -29,12 +28,9 @@ export const SoundActionButton = ({
   shouldShowSpinner = false,
   onClick: handleClick
 }: Props) => {
-  const iconRef = useRef<HTMLSpanElement | null>(null)
-  const textRef = useRef<HTMLSpanElement | null>(null)
-  const spinnerRef = useRef<HTMLSpanElement | null>(null)
-  const pressStartTimeRef = useRef<number>(0)
-  const releaseTimerRef = useRef<number | null>(null)
-  const [isPressed, setIsPressed] = useState<boolean>(false)
+  const iconRef = useRef<HTMLSpanElement>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+  const spinnerRef = useRef<HTMLSpanElement>(null)
 
   const [isSpinnerOnly, setIsSpinnerOnly] = useState<boolean>(
     displayType === "on" && shouldShowSpinner
@@ -76,7 +72,7 @@ export const SoundActionButton = ({
     }
 
     if (was && !now) {
-      // スピナー終了 -> 通常表示に戻す
+      // スピナー終了 -> 通常表示に戻す (外部状態変化に伴う更新のため許容)
       setIsSpinnerOnly(false)
     }
   }, [shouldShowSpinner, displayType])
@@ -93,51 +89,8 @@ export const SoundActionButton = ({
     })
   }, [isSpinnerOnly, displayType])
 
-  /** 押下開始（スクイーズ開始） */
-  const handlePressStart = () => {
-    if (releaseTimerRef.current !== null) {
-      window.clearTimeout(releaseTimerRef.current)
-      releaseTimerRef.current = null
-    }
-    pressStartTimeRef.current = performance.now()
-    setIsPressed(true)
-  }
-
-  /** 押下終了（最低表示時間を保証してスクイーズ解除） */
-  const handlePressEnd = () => {
-    const elapsed = performance.now() - pressStartTimeRef.current
-    const remaining = Math.max(0, MIN_PRESSED_MS - elapsed)
-
-    if (remaining <= 0) {
-      setIsPressed(false)
-      return
-    }
-
-    releaseTimerRef.current = window.setTimeout(() => {
-      setIsPressed(false)
-      releaseTimerRef.current = null
-    }, remaining)
-  }
-
-  // アンマウント時にタイマーをクリア
-  useEffect(() => {
-    return () => {
-      if (releaseTimerRef.current !== null) {
-        window.clearTimeout(releaseTimerRef.current)
-      }
-    }
-  }, [])
-
   return (
-    <button
-      className={clsx(styles.soundActionButton, isPressed && styles.Pressed)}
-      onClick={handleClick}
-      onPointerCancel={handlePressEnd}
-      onPointerDown={handlePressStart}
-      onPointerLeave={handlePressEnd}
-      onPointerUp={handlePressEnd}
-      type="button"
-    >
+    <PushSqueezeButton className={styles.soundActionButton} onClick={handleClick}>
       {isSpinnerOnly ? (
         <span ref={spinnerRef} className={styles.loadingSpinner} />
       ) : (
@@ -150,6 +103,6 @@ export const SoundActionButton = ({
           </span>
         </>
       )}
-    </button>
+    </PushSqueezeButton>
   )
 }
