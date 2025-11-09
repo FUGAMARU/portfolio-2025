@@ -1,3 +1,4 @@
+import clsx from "clsx"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
@@ -9,6 +10,11 @@ import { getResourceUrl } from "@/utils"
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { Work } from "@/hooks/useDataFetch"
 import type { ComponentProps } from "react"
+
+// 拡張係数: Window高さ増分のうち本文拡張に割り当てる割合
+const GROW_FACTOR = 0.7
+// 初期表示での説明文最大高さ (rem単位基準値)
+const INITIAL_DESCRIPTION_MAX_REM = 7.25
 
 /** Props */
 type Props = Work &
@@ -29,10 +35,22 @@ export const WorkDetailWindow = ({
   referenceLinks,
   ...windowContainerProps
 }: Props) => {
+  const initialMaxHeightRef = useRef<number>(null)
   const descriptionRef = useRef<HTMLParagraphElement>(null)
   const thumbRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const [windowScale, setWindowScale] = useState(1)
+  const [dynamicMaxHeight, setDynamicMaxHeight] = useState<number>()
+  /** カスタムスクロールバーの状態 */
+  const [scrollbarState, setScrollbarState] = useState<{
+    /** 非表示かどうか */
+    isHidden: boolean
+    /** 高さ */
+    height: number
+    /** Y方向変位 */
+    translateY: number
+  }>({ isHidden: true, height: 0, translateY: 0 })
 
   // WindowContainerの幅を基準に要素をスケール
   useLayoutEffect(() => {
@@ -47,14 +65,34 @@ export const WorkDetailWindow = ({
     }
 
     let baseWidth: number | undefined
+    let baseHeight: number | undefined
     const resizeObserver = new ResizeObserver(([entry]) => {
-      const { width } = entry.contentRect
+      const { width, height } = entry.contentRect
       if (baseWidth === undefined) {
         baseWidth = width
-        return
       }
+
+      if (baseHeight === undefined) {
+        baseHeight = height
+        // 初期maxHeightを実測で取得（CSSのremやフォントロード後の値に追従）
+        if (initialMaxHeightRef.current === null) {
+          const descEl = descriptionRef.current
+          if (descEl !== null) {
+            initialMaxHeightRef.current = descEl.clientHeight
+          }
+        }
+      }
+
       if (baseWidth > 0) {
-        setWindowScale(Math.max(1, width / baseWidth))
+        const nextScale = Math.max(1, width / baseWidth)
+        setWindowScale(nextScale)
+      }
+
+      if (baseHeight !== undefined) {
+        const INITIAL_MAX = initialMaxHeightRef.current ?? INITIAL_DESCRIPTION_MAX_REM * 16 // 1rem = 16px
+        const extra = Math.max(0, height - baseHeight)
+        const target = INITIAL_MAX + extra * GROW_FACTOR
+        setDynamicMaxHeight(target)
       }
     })
     resizeObserver.observe(windowElement)
@@ -65,56 +103,99 @@ export const WorkDetailWindow = ({
   // macOSなどではオーバーレイスクロールバーが採用されており、ユーザーのシステム設定やOSの挙動により未操作時は非表示になる。
   // 今回はカスタムスクロールバーを常時表示させたいので、独自のトラック/サムを描写し、サムの位置やサイズを同期させるためにuseEffectでDOM計測とイベント購読を実装している。
   useEffect(() => {
-    const descriptionElement = descriptionRef.current
-    const thumbElement = thumbRef.current
-    if (descriptionElement === null || thumbElement === null) {
+    const description = descriptionRef.current
+    if (description === null) {
       return
     }
 
-    /** スクロール位置と内容の高さに応じて、カスタムスクロールバーのサムを更新する */
-    const updateThumb = () => {
-      const visibleHeight = descriptionElement.clientHeight
-      const totalHeight = descriptionElement.scrollHeight
-      const scrollTop = descriptionElement.scrollTop
+    let rafId: number | undefined
+    const MIN_THUMB_HEIGHT = 24
 
-      if (totalHeight <= 0 || visibleHeight <= 0) {
+    /** スクロール量と内容サイズからthumb状態を再計算 */
+    const compute = () => {
+      const visibleHeight = description.clientHeight
+      const totalHeight = description.scrollHeight
+      const scrollTop = description.scrollTop
+      if (visibleHeight <= 0 || totalHeight <= 0) {
+        setScrollbarState({ isHidden: true, height: 0, translateY: 0 })
         return
       }
 
       const contentScrollable = totalHeight > visibleHeight
-      const minThumbHeight = 24
-      const calculatedThumbHeight = contentScrollable
-        ? Math.max((visibleHeight / totalHeight) * visibleHeight, minThumbHeight)
-        : visibleHeight
+      if (!contentScrollable) {
+        setScrollbarState({ isHidden: true, height: 0, translateY: 0 })
+        return
+      }
 
-      const maxThumbTop = Math.max(visibleHeight - calculatedThumbHeight, 0)
-      const scrollProgress = contentScrollable
-        ? scrollTop / Math.max(totalHeight - visibleHeight, 1)
-        : 0
-      const thumbTop = maxThumbTop * scrollProgress
-
-      thumbElement.style.height = `${calculatedThumbHeight}px`
-      thumbElement.style.transform = `translateY(${thumbTop}px)`
+      if (trackRef.current !== null) {
+        trackRef.current.style.height = `${visibleHeight}px`
+      }
+      const height = Math.max((visibleHeight / totalHeight) * visibleHeight, MIN_THUMB_HEIGHT)
+      const maxTop = Math.max(visibleHeight - height, 0)
+      const progress = scrollTop / Math.max(totalHeight - visibleHeight, 1)
+      const translateY = maxTop * progress
+      setScrollbarState({ isHidden: false, height, translateY })
     }
 
-    updateThumb()
-    descriptionElement.addEventListener("scroll", updateThumb, { passive: true })
-    window.addEventListener("resize", updateThumb)
+    /** 連続スクロール時の再計算を1フレーム1回に制限 */
+    const schedule = () => {
+      if (rafId !== undefined) {
+        return
+      }
 
-    let resizeObserver: ResizeObserver | null = null
+      rafId = requestAnimationFrame(() => {
+        rafId = undefined
+        compute()
+      })
+    }
+
+    description.addEventListener("scroll", schedule, { passive: true })
+    window.addEventListener("resize", schedule)
+
+    let resizeObserver: ResizeObserver | undefined
     if ("ResizeObserver" in window) {
-      resizeObserver = new ResizeObserver(updateThumb)
-      resizeObserver.observe(descriptionElement)
+      resizeObserver = new ResizeObserver(compute)
+      resizeObserver.observe(description)
     }
 
     return () => {
-      descriptionElement.removeEventListener("scroll", updateThumb)
-      window.removeEventListener("resize", updateThumb)
-      if (resizeObserver !== null) {
-        resizeObserver.disconnect()
+      description.removeEventListener("scroll", schedule)
+      window.removeEventListener("resize", schedule)
+
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId)
       }
+
+      resizeObserver?.disconnect()
     }
-  }, [description])
+  }, [])
+
+  // 初期thumb計算をレイアウト確定後に一度だけ実行
+  useLayoutEffect(() => {
+    const description = descriptionRef.current
+    if (description === null) {
+      return
+    }
+
+    // 初期thumb計算は次フレームで実行し同期的な再レンダーを避ける
+    requestAnimationFrame(() => {
+      const visibleHeight = description.clientHeight
+      const totalHeight = description.scrollHeight
+      if (visibleHeight <= 0 || totalHeight <= 0 || totalHeight <= visibleHeight) {
+        setScrollbarState({ isHidden: true, height: 0, translateY: 0 })
+        return
+      }
+
+      const MIN_THUMB_HEIGHT = 24
+      // 初期計算時もトラック高さを同期
+      if (trackRef.current !== null) {
+        trackRef.current.style.height = `${visibleHeight}px`
+      }
+
+      const height = Math.max((visibleHeight / totalHeight) * visibleHeight, MIN_THUMB_HEIGHT)
+      setScrollbarState({ isHidden: false, height, translateY: 0 })
+    })
+  }, [])
 
   return (
     <WindowContainer
@@ -137,25 +218,44 @@ export const WorkDetailWindow = ({
           <img className={styles.logo} src={getResourceUrl(logoImage)} />
 
           <div className={styles.tags}>
-            {tags.map((tag, index) => (
-              <span key={index} className={styles.tag}>
+            {tags.map(tag => (
+              <span key={tag} className={styles.tag}>
                 {tag}
               </span>
             ))}
           </div>
 
           <div className={styles.content}>
-            <p ref={descriptionRef} className={styles.description}>
+            <p
+              ref={descriptionRef}
+              className={styles.description}
+              style={
+                dynamicMaxHeight !== undefined
+                  ? { maxHeight: `${Math.round(dynamicMaxHeight)}px` }
+                  : undefined
+              }
+            >
               {description}
             </p>
-            <div className={styles.scrollbar}>
-              <div ref={thumbRef} className={styles.thumb} />
+            <div ref={trackRef} className={styles.scrollbar}>
+              <div
+                ref={thumbRef}
+                className={clsx(styles.thumb, { [styles.Hidden]: scrollbarState.isHidden })}
+                style={
+                  scrollbarState.isHidden
+                    ? undefined
+                    : {
+                        height: `${Math.round(scrollbarState.height)}px`,
+                        transform: `translateY(${Math.round(scrollbarState.translateY)}px)`
+                      }
+                }
+              />
             </div>
           </div>
 
           <div className={styles.links}>
-            {referenceLinks.map((link, index) => (
-              <WorkLinkButton key={index} href={link.href} text={link.text} />
+            {referenceLinks.map(link => (
+              <WorkLinkButton key={link.href} href={link.href} text={link.text} />
             ))}
           </div>
         </div>

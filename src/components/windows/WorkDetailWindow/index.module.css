@@ -2,6 +2,7 @@
   display: flex;
   gap: 1.25rem;
   width: calc(59.375rem * var(--window-scale));
+  height: 100%;
   padding-top: calc(0.5rem * var(--window-scale));
 
   --window-scale: var(--window-scale, 1);
@@ -24,9 +25,11 @@
 
   > .info {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 1.125rem;
-    align-items: center;
+    align-items: stretch;
+    min-width: 0;
 
     > .logo {
       width: auto;
@@ -53,6 +56,9 @@
 
     > .content {
       position: relative;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
       width: 100%;
 
       > .description {
@@ -89,7 +95,13 @@
           width: 100%;
           background-color: var(--color-use-case-scrollbar-thumb);
           border-radius: 1.25rem;
-          transition: background-color 120ms ease;
+          transition:
+            background-color 120ms ease,
+            opacity 120ms ease;
+
+          &.Hidden {
+            opacity: 0;
+          }
         }
       }
     }
@@ -97,6 +109,7 @@
     > .links {
       display: flex;
       gap: 1rem;
+      justify-content: center;
     }
   }
 }
