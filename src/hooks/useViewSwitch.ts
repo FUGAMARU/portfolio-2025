@@ -35,7 +35,7 @@ export const useViewSwitch = ({
 }: Params) => {
   const [showWelcome, setShowWelcome] = useState(true)
   const [isPlayButtonShowsSpinner, setIsPlayButtonShowsSpinner] = useState(false)
-  const [playStartedAtMs, setPlayStartedAtMs] = useState<number | null>(null)
+  const playStartedAtMsRef = useRef<number>(null) // UI再描画不要のためrefで保持
   const welcomeRef = useRef<HTMLDivElement>(null)
   const mainRef = useRef<HTMLDivElement>(null)
   const hasQueuedFadeRef = useRef(false)
@@ -85,32 +85,35 @@ export const useViewSwitch = ({
     if (!started) {
       return
     }
-    if (playStartedAtMs === null) {
-      setPlayStartedAtMs(Date.now())
+    if (playStartedAtMsRef.current === null) {
+      playStartedAtMsRef.current = Date.now()
     }
-  }, [isMuted, progressPercent, isPlaying, showWelcome, playStartedAtMs])
+  }, [isMuted, progressPercent, isPlaying, showWelcome])
 
   // 再生開始から一定秒数経過後にWelcomeViewをフェードアウトする副作用
   useEffect(() => {
-    const isMutedOff = isMuted === false
-    if (!isMutedOff || welcomeRef.current === null || showWelcome === false || !canFadeOutWelcome) {
+    const canAttemptFade =
+      isMuted === false && // ミュート解除済み
+      welcomeRef.current !== null &&
+      showWelcome === true &&
+      canFadeOutWelcome === true &&
+      playStartedAtMsRef.current !== null &&
+      !hasQueuedFadeRef.current
+
+    if (!canAttemptFade) {
       return
     }
 
-    if (playStartedAtMs === null || hasQueuedFadeRef.current) {
-      return
-    }
-
-    const elapsed = Date.now() - playStartedAtMs
+    // playStartedAtMsRef.current は canAttemptFade が true の場合非null
+    const startedAt = playStartedAtMsRef.current as number
+    const elapsed = Date.now() - startedAt
     const remaining = Math.max(0, STARTED_TO_FADE_DELAY_MS - elapsed)
 
     const timer = window.setTimeout(() => {
       if (welcomeRef.current === null || hasQueuedFadeRef.current) {
         return
       }
-
       hasQueuedFadeRef.current = true
-
       animate(welcomeRef.current, {
         opacity: [1, 0],
         duration: WELCOME_FADE_DURATION_MS,
@@ -122,9 +125,10 @@ export const useViewSwitch = ({
   }, [
     isMuted,
     canFadeOutWelcome,
-    playStartedAtMs,
     showWelcome,
-    handleDelayedWelcomeFadeOutComplete
+    handleDelayedWelcomeFadeOutComplete,
+    progressPercent,
+    isPlaying
   ])
 
   return {

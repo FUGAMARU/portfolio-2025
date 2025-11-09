@@ -9,6 +9,7 @@ import eslintPluginJsdoc from "eslint-plugin-jsdoc"
 import tsEslintPlugin from "@typescript-eslint/eslint-plugin"
 import eslintPluginReactConfig from "eslint-plugin-react/configs/recommended.js"
 import typescriptEslintParser from "@typescript-eslint/parser"
+import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect"
 
 export default tseslint.config(
   {
@@ -18,13 +19,15 @@ export default tseslint.config(
       ".prettierrc.js",
       ".stylelintrc.js",
       "eslint.config.js",
-      "vite.config.ts"
+      "vite.config.ts",
+      "src/vite-env.d.ts"
     ]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   eslintPluginJsdoc.configs["flat/recommended-typescript-error"],
+  reactYouMightNotNeedAnEffect.configs.recommended,
   {
     languageOptions: {
       ecmaVersion: 2020,

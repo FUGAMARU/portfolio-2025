@@ -48,7 +48,8 @@ type Props = {
 
 /** 星アイコンのウィジェット */
 export const StarWidget = ({ currentServerTime }: Props) => {
-  const [displayTime, setDisplayTime] = useState<string>("")
+  const initialDisplay = currentServerTime !== undefined ? formatDatetime(currentServerTime) : ""
+  const [displayTime, setDisplayTime] = useState<string>(initialDisplay)
 
   useEffect(() => {
     if (currentServerTime === undefined) {
@@ -68,8 +69,6 @@ export const StarWidget = ({ currentServerTime }: Props) => {
       const currentMs = baseServerMs + elapsed
       setDisplayTime(formatDatetime(new Date(currentMs).toISOString()))
     }
-
-    updateDisplayTime()
 
     let rafId: number
     /** アニメーションフレームごとに表示更新 */

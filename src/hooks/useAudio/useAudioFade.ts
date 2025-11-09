@@ -67,15 +67,17 @@ export const useAudioFade = (playerRef: RefObject<YouTubePlayer | null>) => {
 
       return new Promise<void>(resolve => {
         fadeTimerRef.current = window.setInterval(() => {
-          currentStep += 1
+          currentStep++
           const next = startVolume + deltaPerStep * currentStep
           setPlayerVolume(next)
 
-          if (currentStep >= steps) {
-            clearFadeTimer()
-            setPlayerVolume(targetVolume)
-            resolve()
+          if (currentStep < steps) {
+            return
           }
+
+          clearFadeTimer()
+          setPlayerVolume(targetVolume)
+          resolve()
         }, intervalMs)
       })
     },
@@ -99,6 +101,22 @@ export const useAudioFade = (playerRef: RefObject<YouTubePlayer | null>) => {
     setPlayerVolume(INTENDED_VOLUME)
   }, [clearFadeTimer, setPlayerVolume])
 
+  /** pendingFadeInRef を外部からリセットする（直接のプロパティ操作を避けるラッパー） */
+  const resetPendingFadeIn = useCallback(() => {
+    pendingFadeInRef.current = false
+  }, [])
+
+  /** 一時停止処理へ遷移中であることを示す（直接のプロパティ操作を避けるラッパー） */
+  const markPausing = useCallback(() => {
+    isPausingRef.current = true
+  }, [])
+
+  /** アクションシーケンスを進める（直接のインクリメントを隠蔽） */
+  const nextActionSeq = useCallback(() => {
+    actionSeqRef.current += 1
+    return actionSeqRef.current
+  }, [])
+
   return {
     fadeTo,
     prepareFadeInForResume,
@@ -107,6 +125,9 @@ export const useAudioFade = (playerRef: RefObject<YouTubePlayer | null>) => {
     isPausingRef,
     actionSeqRef,
     clearFadeTimer,
-    INTENDED_VOLUME
+    INTENDED_VOLUME,
+    resetPendingFadeIn,
+    markPausing,
+    nextActionSeq
   }
 }

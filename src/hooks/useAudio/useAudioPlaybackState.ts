@@ -42,9 +42,9 @@ export const useAudioPlaybackState = (
     }
 
     setPlaybackState(YouTubePlayerState.PAUSED)
-    fade.pendingFadeInRef.current = false
-    fade.isPausingRef.current = true
-    const mySeq = ++fade.actionSeqRef.current
+    fade.resetPendingFadeIn()
+    fade.markPausing()
+    const mySeq = fade.nextActionSeq()
     fade.clearFadeTimer()
     fade.fadeTo(0).then(() => {
       if (fade.actionSeqRef.current === mySeq && fade.isPausingRef.current) {
@@ -59,7 +59,7 @@ export const useAudioPlaybackState = (
       const state = event.data
       setPlaybackState(state)
       if (state === YouTubePlayerState.PLAYING && fade.pendingFadeInRef.current) {
-        fade.pendingFadeInRef.current = false
+        fade.resetPendingFadeIn()
         fade.fadeTo(fade.INTENDED_VOLUME)
       }
     },

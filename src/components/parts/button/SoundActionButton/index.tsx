@@ -32,7 +32,7 @@ export const SoundActionButton = ({
   const textRef = useRef<HTMLSpanElement>(null)
   const spinnerRef = useRef<HTMLSpanElement>(null)
 
-  const [isSpinnerOnly, setIsSpinnerOnly] = useState<boolean>(
+  const [isSpinnerMode, setIsSpinnerMode] = useState<boolean>(
     displayType === "on" && shouldShowSpinner
   )
   const prevShouldShowSpinnerRef = useRef<boolean>(shouldShowSpinner)
@@ -65,21 +65,21 @@ export const SoundActionButton = ({
       }
 
       const timer = window.setTimeout(() => {
-        setIsSpinnerOnly(true)
+        setIsSpinnerMode(true)
       }, FADE_DURATION_MS)
 
       return () => window.clearTimeout(timer)
-    }
-
-    if (was && !now) {
-      // スピナー終了 -> 通常表示に戻す (外部状態変化に伴う更新のため許容)
-      setIsSpinnerOnly(false)
     }
   }, [shouldShowSpinner, displayType])
 
   // スピナーのみに切替時のフェードイン
   useEffect(() => {
-    if (!isSpinnerOnly || displayType !== "on" || spinnerRef.current === null) {
+    if (
+      !isSpinnerMode ||
+      !shouldShowSpinner ||
+      displayType !== "on" ||
+      spinnerRef.current === null
+    ) {
       return
     }
     animate(spinnerRef.current, {
@@ -87,11 +87,11 @@ export const SoundActionButton = ({
       duration: FADE_DURATION_MS,
       easing: EASING_EASE_OUT_QUAD
     })
-  }, [isSpinnerOnly, displayType])
+  }, [isSpinnerMode, shouldShowSpinner, displayType])
 
   return (
     <PushSqueezeButton className={styles.soundActionButton} onClick={handleClick}>
-      {isSpinnerOnly ? (
+      {shouldShowSpinner && isSpinnerMode ? (
         <span ref={spinnerRef} className={styles.loadingSpinner} />
       ) : (
         <>
