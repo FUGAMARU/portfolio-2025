@@ -79,9 +79,13 @@ export type PortfolioData = {
 export const useDataFetch = () => {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>()
   const [currentServerTime, setCurrentServerTime] = useState<string>()
+  const [totalMediaAssets, setTotalMediaAssets] = useState<number>(0)
+  const [loadedMediaAssets, setLoadedMediaAssets] = useState<number>(0)
   const isDev = import.meta.env.DEV
 
   useEffect(() => {
+    let isMounted = true // StrictMode対策
+
     /** データ取得関数 */
     const fetchData = async () => {
       try {
@@ -104,7 +108,15 @@ export const useDataFetch = () => {
 
         // 画像をBlobとして取得してObjectURLに変換
         if (isDev) {
-          console.log("🖼️  画像プリロード開始（createObjectURL使用）")
+          console.log("🖼️  画像プリロード開始")
+        }
+
+        const workImageCount = result.works.length * 2
+        const bgmArtworkCount = result.bgm.filter(t => !t.artwork.startsWith("http")).length
+        const total = workImageCount + bgmArtworkCount
+        if (isMounted) {
+          setTotalMediaAssets(total)
+          setLoadedMediaAssets(0)
         }
 
         /**
@@ -114,21 +126,25 @@ export const useDataFetch = () => {
          * @returns ObjectURL
          */
         const convertToObjectUrl = async (url: string): Promise<string> => {
+          let objectUrlOrOriginal = url
           try {
             const fullUrl = getResourceUrl(url)
             const response = await axios.get(fullUrl, { responseType: "blob" })
-            const objectUrl = URL.createObjectURL(response.data)
+            objectUrlOrOriginal = URL.createObjectURL(response.data)
             if (isDev) {
-              console.log(`  ✓ ${url.split("/").pop()} → ${objectUrl}`)
+              console.log(`  ✓ ${url.split("/").pop()} → ${objectUrlOrOriginal}`)
             }
-            return objectUrl
           } catch (error) {
             if (isDev) {
               console.error(`  ✗ ${url.split("/").pop()}`, error)
             }
-            // エラーの場合は元のURLを返す
-            return url
+          } finally {
+            // 読み込み完了（成功/失敗問わず）でカウントを進める
+            if (isMounted) {
+              setLoadedMediaAssets(prev => prev + 1)
+            }
           }
+          return objectUrlOrOriginal
         }
 
         // Works画像を変換
@@ -164,7 +180,9 @@ export const useDataFetch = () => {
           console.log("✅ 画像プリロード完了（ObjectURL生成済み）")
         }
 
-        setPortfolioData(processedData)
+        if (isMounted) {
+          setPortfolioData(processedData)
+        }
 
         // 取得できた2つの時刻レスポンスを計測し、RTTが最も小さい測定結果を採用
 
@@ -193,7 +211,9 @@ export const useDataFetch = () => {
         const measurement2Start = performance.now()
         const measurement2 = measureServerTime(timeResponse2, measurement2Start)
         const best = measurement1.rtt <= measurement2.rtt ? measurement1 : measurement2
-        setCurrentServerTime(new Date(best.correctedCurrentMs).toISOString())
+        if (isMounted) {
+          setCurrentServerTime(new Date(best.correctedCurrentMs).toISOString())
+        }
       } catch (e) {
         console.error(e)
         alert("APIにアクセスできませんでした")
@@ -201,7 +221,18 @@ export const useDataFetch = () => {
     }
 
     fetchData()
+
+    return () => {
+      isMounted = false
+    }
   }, [isDev])
 
-  return { portfolioData, currentServerTime } as const
+  const mediaDownload = {
+    total: totalMediaAssets,
+    loaded: loadedMediaAssets,
+    progress: totalMediaAssets === 0 ? 0 : loadedMediaAssets / totalMediaAssets,
+    isComplete: totalMediaAssets > 0 && loadedMediaAssets >= totalMediaAssets
+  }
+
+  return { portfolioData, currentServerTime, mediaDownload } as const
 }

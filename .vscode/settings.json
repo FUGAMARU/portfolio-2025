@@ -17,6 +17,7 @@
     "fugamaru",
     "animejs",
     "embla",
-    "mousedown"
+    "mousedown",
+    "crossfade"
   ]
 }

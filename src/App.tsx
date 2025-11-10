@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai"
 import { useAtom } from "jotai"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import YouTube from "react-youtube"
 
 import styles from "@/App.module.css"
@@ -15,9 +15,12 @@ import {
   shouldResumeAfterVisibilityReturnAtom
 } from "@/stores/audioAtoms"
 
+/** リソース読み込み完了後SoundActionButtonへの表示切り替えまでの待機時間(ms) */
+const POST_LOAD_DELAY_MS = 1000
+
 /** App */
 export const App = () => {
-  const { portfolioData, currentServerTime } = useDataFetch()
+  const { portfolioData, currentServerTime, mediaDownload } = useDataFetch()
   const {
     handleReady,
     handlePlayButtonClick,
@@ -25,6 +28,20 @@ export const App = () => {
     handlePlaybackStateChange,
     currentYoutubeId
   } = useAudio(portfolioData?.bgm ?? [])
+
+  // リソース読み込み完了後に一定時間待ってからSoundActionButtonを表示するようにするための処理
+  const [shouldPostLoadDelayExpired, setShouldPostLoadDelayExpired] = useState(false)
+  const completedAtRef = useRef<number>(null)
+  useEffect(() => {
+    if (!(mediaDownload.isComplete && completedAtRef.current === null)) {
+      return
+    }
+
+    completedAtRef.current = Date.now()
+    const id = setTimeout(() => setShouldPostLoadDelayExpired(true), POST_LOAD_DELAY_MS)
+
+    return () => clearTimeout(id)
+  }, [mediaDownload.isComplete])
 
   const [youtubeAutoplay, setYoutubeAutoplay] = useState<0 | 1>(0)
   const [youtubeKey, setYoutubeKey] = useState<number>(0)
@@ -87,7 +104,9 @@ export const App = () => {
       {shouldShowWelcomeView && (
         <div ref={welcomeRef} className={styles.welcomeViewContainer}>
           <WelcomeView
+            isMediaLoading={!mediaDownload.isComplete || !shouldPostLoadDelayExpired}
             isPlayButtonShowsSpinner={isPlayButtonShowsSpinner}
+            mediaProgressPercent={mediaDownload.progress * 100}
             onPlayClick={onPlayClick}
             setIsMuted={setIsMuted}
           />
