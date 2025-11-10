@@ -3,6 +3,7 @@ import clsx from "clsx"
 import { useAtomValue } from "jotai"
 import { useRef } from "react"
 
+import { ProgressBar } from "@/components/parts/ProgressBar"
 import { CloseIcon } from "@/components/windows/PlayerWindow/CloseIcon"
 import styles from "@/components/windows/PlayerWindow/index.module.css"
 import { NextTrackIcon } from "@/components/windows/PlayerWindow/NextTrackIcon"
@@ -84,10 +85,7 @@ export const PlayerWindow = () => {
               <NextTrackIcon />
             </button>
           </div>
-
-          <div className={styles.seekbar}>
-            <div className={styles.current} style={{ width: `${progressPercent}%` }} />
-          </div>
+          <ProgressBar progress={progressPercent} />
         </div>
       </div>
 
