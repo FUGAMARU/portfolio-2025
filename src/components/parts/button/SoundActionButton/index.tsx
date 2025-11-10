@@ -2,10 +2,10 @@ import { animate } from "animejs"
 import clsx from "clsx"
 import { useEffect, useRef, useState } from "react"
 
+import { PushSqueezeButton } from "@/components/parts/button/PushSqueezeButton"
 import styles from "@/components/parts/button/SoundActionButton/index.module.css"
 import { SoundOffIcon } from "@/components/parts/button/SoundActionButton/SoundOffIcon"
 import { SoundOnIcon } from "@/components/parts/button/SoundActionButton/SoundOnIcon"
-import { PushSqueezeButton } from "@/components/parts/PushSqueezeButton"
 
 import type { ComponentProps } from "react"
 
