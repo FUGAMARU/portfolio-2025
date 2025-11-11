@@ -47,10 +47,10 @@
 
       > .tag {
         display: inline-block;
-        padding: calc(0.25rem * var(--window-scale)) calc(0.5rem * var(--window-scale));
-        font-size: calc(0.75rem * var(--window-scale));
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
         border: solid 1px var(--color-general-white);
-        border-radius: calc(0.5rem * var(--window-scale));
+        border-radius: 0.5rem;
         text-box: trim-both cap alphabetic;
       }
     }
@@ -58,7 +58,6 @@
     > .content {
       position: relative;
       display: flex;
-      flex: 1;
       flex-direction: column;
       width: 100%;
 

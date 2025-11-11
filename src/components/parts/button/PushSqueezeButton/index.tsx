@@ -1,7 +1,7 @@
 import clsx from "clsx"
 import { useEffect, useRef, useState } from "react"
 
-import styles from "@/components/parts/PushSqueezeButton/index.module.css"
+import styles from "@/components/parts/button/PushSqueezeButton/index.module.css"
 
 import type { ComponentProps, ReactNode } from "react"
 
