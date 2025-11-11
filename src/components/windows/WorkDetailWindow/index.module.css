@@ -1,6 +1,7 @@
 .workDetailWindow {
   display: flex;
   gap: 1.25rem;
+  align-items: center;
   width: calc(59.375rem * var(--window-scale));
   height: 100%;
   padding-top: calc(0.5rem * var(--window-scale));
@@ -8,17 +9,18 @@
   --window-scale: var(--window-scale, 1);
 
   > .preview {
-    display: grid;
+    display: flex;
     flex-shrink: 0;
-    place-items: center;
+    align-items: center;
+    justify-content: center;
     width: calc(32.5rem * var(--window-scale) - 1.25rem);
+    height: min(calc(17.5rem * var(--window-scale)), 100%);
+    max-height: calc(17.5rem * var(--window-scale));
 
     > .image {
-      width: 100%;
-      max-width: calc(30rem * var(--window-scale));
-      height: auto;
-      max-height: calc(17.5rem * var(--window-scale));
-      object-fit: contain;
+      display: block;
+      max-width: 100%;
+      height: 100%;
       border-radius: calc(8px * var(--window-scale));
     }
   }
