@@ -21,7 +21,7 @@
 
   &::before {
     position: absolute;
-    inset: 4px;
+    inset: 0.25rem;
     z-index: 1;
     content: "";
     border-radius: 20px;
@@ -32,7 +32,7 @@
   > .icon {
     width: 50%;
     height: 50%;
-    margin-left: 3px;
+    margin-left: 0.1875rem;
     object-fit: contain;
   }
 }

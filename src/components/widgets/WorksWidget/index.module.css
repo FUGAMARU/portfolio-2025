@@ -47,7 +47,7 @@
           flex: 0 0 100%;
           justify-content: center;
           min-width: 0;
-          padding: 4px 0;
+          padding-block: 0.25rem;
 
           > .grid {
             display: grid;
@@ -68,7 +68,7 @@
       position: absolute;
       top: 50%;
       visibility: hidden;
-      transform: translateY(calc(-50% + 8px));
+      transform: translateY(calc(-50% + 0.5rem));
       transition:
         visibility 0s 0.45s,
         transform 0.45s ease;
@@ -84,8 +84,8 @@
       > .main {
         display: grid;
         place-items: center;
-        width: 48px;
-        height: 48px;
+        width: 3rem;
+        height: 3rem;
         background-color: var(--color-general-bitter-yellow-alpha-40);
         border-radius: 50%;
         opacity: 0;
@@ -99,8 +99,8 @@
         }
 
         > .icon {
-          width: 32px;
-          height: 32px;
+          width: 2rem;
+          height: 2rem;
           fill: var(--color-general-rich-yellow);
           transition: fill 0.3s;
 
@@ -141,7 +141,7 @@
 
   .AppearHidden {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(0.5rem);
     transition:
       opacity 0.45s ease,
       transform 0.45s ease;

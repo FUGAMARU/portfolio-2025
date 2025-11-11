@@ -3,11 +3,11 @@
   display: flex;
   gap: 0.625rem;
   align-items: center;
-  padding: 12px 16px;
+  padding: 0.75rem 1rem;
   background-color: var(--color-use-case-window-background);
   border: solid 1px var(--color-use-case-window-border);
-  border-radius: 1.25rem;
-  backdrop-filter: blur(0.25rem);
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
   will-change: backdrop-filter; /* Safari系最適化: will-changeで初期適用ラグを軽減 */
 
   &:hover > .close {
@@ -19,13 +19,13 @@
     width: 4rem;
     height: 4rem;
     padding: 0.125rem;
-    border-radius: 0.5rem;
+    border-radius: 8px;
 
     > .image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 0.5rem;
+      border-radius: 8px;
     }
   }
 
@@ -79,21 +79,21 @@
             transform: scale(var(--icon-scale, 1));
             transform-origin: 50% 50%;
           }
-        }
 
-        > .item.Play > svg {
-          --icon-scale: 0.8;
-        }
+          &.Play > svg {
+            --icon-scale: 0.8;
+          }
 
-        > .item.Pause > svg {
-          --icon-scale: 1.2;
-        }
+          &.Pause > svg {
+            --icon-scale: 1.2;
+          }
 
-        > .item.NextTrack > svg {
-          --icon-scale: 0.9;
+          &.NextTrack > svg {
+            --icon-scale: 0.9;
 
-          fill: currentcolor;
-          stroke: none;
+            fill: currentcolor;
+            stroke: none;
+          }
         }
       }
     }
@@ -109,8 +109,8 @@
     z-index: 1;
     display: grid;
     place-items: center;
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
     pointer-events: none;
     background-color: var(--color-use-case-player-window-close);
     border: solid 1px var(--color-use-case-window-border);
@@ -121,8 +121,8 @@
 
     > .icon {
       display: block;
-      width: 12px;
-      height: 12px;
+      width: 0.75rem;
+      height: 0.75rem;
       line-height: 0;
     }
   }

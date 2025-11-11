@@ -1,11 +1,11 @@
 .windowControl {
   display: flex;
-  gap: 10px;
+  gap: 0.625rem;
 
   > .button {
     position: relative;
-    width: 12px;
-    height: 12px;
+    width: 0.75rem;
+    height: 0.75rem;
     cursor: default;
     border-radius: 50%;
 
@@ -13,8 +13,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 15px;
-      height: 15px;
+      width: 0.9375rem;
+      height: 0.9375rem;
       opacity: 0;
       transform: translate(-50%, -50%);
 

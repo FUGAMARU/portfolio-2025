@@ -2,8 +2,8 @@
   display: grid;
   place-items: center;
   width: fit-content;
-  height: 28px;
-  padding: 0 16px;
+  height: 1.75rem;
+  padding-inline: 1rem;
   background: var(--gradient-use-case-badge);
   border: solid 1px var(--color-use-case-badge-border);
   border-radius: 8px;

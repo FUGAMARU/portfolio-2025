@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     width: 20rem;
-    height: 36px;
+    height: 2.25rem;
 
     > .inner {
       position: relative;
@@ -51,7 +51,7 @@
       > .fetching {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 1rem;
         transition: opacity 1s;
 
         &.Hidden {
@@ -59,7 +59,7 @@
         }
 
         > .label {
-          font-size: 10px;
+          font-size: 0.625rem;
           line-height: 1;
         }
       }
