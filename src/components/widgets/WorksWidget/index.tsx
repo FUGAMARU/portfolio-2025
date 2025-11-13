@@ -18,7 +18,7 @@ type Props = {
   /** 作品ボタンを押下したときの処理 */
   onWorkButtonClick: (workId: string) => void
   /** 作品データ */
-  worksData: Array<Pick<Work, "id" | "buttonImage" | "logoScale">>
+  worksData: Array<Pick<Work, "id" | "icon" | "logoScale">>
   /** 初期表示時のアニメーションを適用するかどうか */
   shouldAppear?: boolean
 }
@@ -78,7 +78,7 @@ export const WorksWidget = ({
                         className={clsx(shouldAppear ? styles.AppearShown : styles.AppearHidden)}
                         logoScale={work.logoScale}
                         onClick={() => handleWorkButtonClick(work.id)}
-                        src={getResourceUrl(work.buttonImage)}
+                        src={getResourceUrl(work.icon)}
                       />
                     </div>
                   ))}

@@ -7,12 +7,12 @@ import { getResourceUrl } from "@/utils"
 export type Work = {
   /** 作品ID */
   id: string
-  /** ボタン表示用の画像 */
-  buttonImage: string
-  /** プレビュー画像 */
-  previewImage: string
-  /** ロゴ画像 */
-  logoImage: string
+  /** アイコン */
+  icon: string
+  /** サムネイル */
+  thumbnail: string
+  /** ロゴ */
+  logo: string
   /** ロゴ画像拡大率 */
   logoScale?: number
   /** タグ一覧 */
@@ -60,6 +60,19 @@ export type PortfolioData = {
       }>
     }
   }
+  /** Inspired By */
+  inspiredBy: Array<{
+    /** ID */
+    id: string
+    /** タイプ */
+    type: "background" | "visual" | "font"
+    /** アイコン */
+    icon: string
+    /** ラベル */
+    label: string
+    /** 遷移先 */
+    href: string
+  }>
   /** BGM */
   bgm: Array<{
     /** タイトル */
@@ -107,13 +120,15 @@ export const useDataFetch = () => {
         const result = basicDataResponse.data
 
         // 画像をBlobとして取得してObjectURLに変換
-        if (isDev) {
-          console.log("🖼️  画像プリロード開始")
-        }
-
         const workImageCount = result.works.length * 2
+        const inspiredByIconCount = result.inspiredBy.length
         const bgmArtworkCount = result.bgm.filter(t => !t.artwork.startsWith("http")).length
-        const total = workImageCount + bgmArtworkCount
+        const total = workImageCount + inspiredByIconCount + bgmArtworkCount
+        if (isDev) {
+          console.log(
+            `🖼️  画像プリロード開始（合計${total}件：Works ${workImageCount}・InspiredBy ${inspiredByIconCount}・BGMアートワーク ${bgmArtworkCount}）`
+          )
+        }
         if (isMounted) {
           setTotalMediaAssets(total)
           setLoadedMediaAssets(0)
@@ -147,12 +162,18 @@ export const useDataFetch = () => {
           return objectUrlOrOriginal
         }
 
-        // Works画像を変換
         const worksWithObjectUrls = await Promise.all(
           result.works.map(async work => ({
             ...work,
-            previewImage: await convertToObjectUrl(work.previewImage),
-            logoImage: await convertToObjectUrl(work.logoImage)
+            thumbnail: await convertToObjectUrl(work.thumbnail),
+            logo: await convertToObjectUrl(work.logo)
+          }))
+        )
+
+        const inspiredByWithObjectUrls = await Promise.all(
+          result.inspiredBy.map(async item => ({
+            ...item,
+            icon: await convertToObjectUrl(item.icon)
           }))
         )
 
@@ -173,11 +194,12 @@ export const useDataFetch = () => {
         const processedData = {
           ...result,
           works: worksWithObjectUrls,
+          inspiredBy: inspiredByWithObjectUrls,
           bgm: bgmWithObjectUrls
         } satisfies PortfolioData
 
         if (isDev) {
-          console.log("✅ 画像プリロード完了（ObjectURL生成済み）")
+          console.log(`✅ 画像プリロード完了（合計${total}件／ObjectURL生成済み）`)
         }
 
         if (isMounted) {

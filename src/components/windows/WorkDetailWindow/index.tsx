@@ -29,8 +29,8 @@ export const WorkDetailWindow = ({
   zIndex,
   onFocus,
   description,
-  previewImage,
-  logoImage,
+  thumbnail,
+  logo,
   tags,
   referenceLinks,
   ...windowContainerProps
@@ -212,10 +212,10 @@ export const WorkDetailWindow = ({
         style={{ ["--window-scale" as string]: windowScale }}
       >
         <div className={styles.preview}>
-          <img className={styles.image} src={getResourceUrl(previewImage)} />
+          <img className={styles.thumbnail} src={getResourceUrl(thumbnail)} />
         </div>
         <div className={styles.info}>
-          <img className={styles.logo} src={getResourceUrl(logoImage)} />
+          <img className={styles.logo} src={getResourceUrl(logo)} />
 
           <div className={styles.tags}>
             {tags.map(tag => (
