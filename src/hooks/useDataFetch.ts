@@ -98,6 +98,7 @@ export const useDataFetch = () => {
 
   useEffect(() => {
     let isMounted = true // StrictMode対策
+    const createdObjectUrls: Array<string> = []
 
     /** データ取得関数 */
     const fetchData = async () => {
@@ -122,7 +123,7 @@ export const useDataFetch = () => {
         // 画像をBlobとして取得してObjectURLに変換
         const workImageCount = result.works.length * 2
         const inspiredByIconCount = result.inspiredBy.length
-        const bgmArtworkCount = result.bgm.filter(t => !t.artwork.startsWith("http")).length
+        const bgmArtworkCount = result.bgm.length
         const total = workImageCount + inspiredByIconCount + bgmArtworkCount
         if (isDev) {
           console.log(
@@ -146,6 +147,7 @@ export const useDataFetch = () => {
             const fullUrl = getResourceUrl(url)
             const response = await axios.get(fullUrl, { responseType: "blob" })
             objectUrlOrOriginal = URL.createObjectURL(response.data)
+            createdObjectUrls.push(objectUrlOrOriginal)
             if (isDev) {
               console.log(`  ✓ ${url.split("/").pop()} → ${objectUrlOrOriginal}`)
             }
@@ -179,16 +181,10 @@ export const useDataFetch = () => {
 
         // アートワークを変換
         const bgmWithObjectUrls = await Promise.all(
-          result.bgm.map(async track => {
-            // 外部URL（Spotifyなど）はそのまま使用
-            if (track.artwork.startsWith("http")) {
-              return track
-            }
-            return {
-              ...track,
-              artwork: await convertToObjectUrl(track.artwork)
-            }
-          })
+          result.bgm.map(async track => ({
+            ...track,
+            artwork: await convertToObjectUrl(track.artwork)
+          }))
         )
 
         const processedData = {
@@ -246,6 +242,13 @@ export const useDataFetch = () => {
 
     return () => {
       isMounted = false
+      // 生成したObjectURLをクリーンアップ
+      if (createdObjectUrls.length > 0) {
+        createdObjectUrls.forEach(url => URL.revokeObjectURL(url))
+        if (isDev) {
+          console.log(`🧹 ObjectURLを解放：${createdObjectUrls.length}件`)
+        }
+      }
     }
   }, [isDev])
 
