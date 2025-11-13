@@ -15,7 +15,6 @@
     "@fontsource/urbanist": "^5.2.7",
     "@types/youtube-player": "^5.5.11",
     "animejs": "^4.2.2",
-    "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "destyle.css": "^4.0.1",
     "embla-carousel-react": "^8.6.0",

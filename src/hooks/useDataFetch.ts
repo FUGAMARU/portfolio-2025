@@ -1,5 +1,5 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import useSWRImmutable from "swr/immutable"
 
 import { getResourceUrl } from "@/utils"
 
@@ -90,174 +90,182 @@ export type PortfolioData = {
 
 /** データフェッチフック */
 export const useDataFetch = () => {
-  const [portfolioData, setPortfolioData] = useState<PortfolioData>()
-  const [currentServerTime, setCurrentServerTime] = useState<string>()
-  const [totalMediaAssets, setTotalMediaAssets] = useState<number>(0)
   const [loadedMediaAssets, setLoadedMediaAssets] = useState<number>(0)
+  const createdObjectUrlListRef = useRef<Array<string>>([])
+  const progressRef = useRef<number>(0)
+  const rafScheduledRef = useRef<boolean>(false)
   const isDev = import.meta.env.DEV
 
-  useEffect(() => {
-    let isMounted = true // StrictMode対策
-    const createdObjectUrls: Array<string> = []
+  // ベースデータ
+  const { data: baseData } = useSWRImmutable<PortfolioData>("/", async (key: string) => {
+    const res = await fetch(getResourceUrl(key), { cache: "no-store" })
+    if (!res.ok) {
+      throw new Error("APIフェッチに失敗しました")
+    }
+    return res.json() as Promise<PortfolioData>
+  })
 
-    /** データ取得関数 */
-    const fetchData = async () => {
-      try {
-        // 時刻だけは2回フェッチして最小RTTを採用
-        const t0a = performance.now()
-        const basicDataPromise = axios.get<PortfolioData>(getResourceUrl("/"))
-        const timePromise1 = axios.get<string>(getResourceUrl("/time"), {
-          headers: { "Cache-Control": "no-store" }
-        })
-        const timePromise2 = axios.get<string>(getResourceUrl("/time"), {
-          headers: { "Cache-Control": "no-store" }
-        })
-        const [basicDataResponse, timeResponse1, timeResponse2] = await Promise.all([
-          basicDataPromise,
-          timePromise1,
-          timePromise2
-        ])
+  // RTT補正済みのサーバ時刻
+  const { data: currentServerTime } = useSWRImmutable<string>("/time/corrected", async () => {
+    const t0a = performance.now()
+    const [r1, r2] = await Promise.all([
+      fetch(getResourceUrl("/time"), { cache: "no-store" }),
+      fetch(getResourceUrl("/time"), { cache: "no-store" })
+    ])
 
-        const result = basicDataResponse.data
-
-        // 画像をBlobとして取得してObjectURLに変換
-        const workImageCount = result.works.length * 2
-        const inspiredByIconCount = result.inspiredBy.length
-        const bgmArtworkCount = result.bgm.length
-        const total = workImageCount + inspiredByIconCount + bgmArtworkCount
-        if (isDev) {
-          console.log(
-            `🖼️  画像プリロード開始（合計${total}件：Works ${workImageCount}・InspiredBy ${inspiredByIconCount}・BGMアートワーク ${bgmArtworkCount}）`
-          )
-        }
-        if (isMounted) {
-          setTotalMediaAssets(total)
-          setLoadedMediaAssets(0)
-        }
-
-        /**
-         * 画像URLをBlobから生成したObjectURLに変換する
-         *
-         * @param url - 元の画像URL
-         * @returns ObjectURL
-         */
-        const convertToObjectUrl = async (url: string): Promise<string> => {
-          let objectUrlOrOriginal = url
-          try {
-            const fullUrl = getResourceUrl(url)
-            const response = await axios.get(fullUrl, { responseType: "blob" })
-            objectUrlOrOriginal = URL.createObjectURL(response.data)
-            createdObjectUrls.push(objectUrlOrOriginal)
-            if (isDev) {
-              console.log(`  ✓ ${url.split("/").pop()} → ${objectUrlOrOriginal}`)
-            }
-          } catch (error) {
-            if (isDev) {
-              console.error(`  ✗ ${url.split("/").pop()}`, error)
-            }
-          } finally {
-            // 読み込み完了（成功/失敗問わず）でカウントを進める
-            if (isMounted) {
-              setLoadedMediaAssets(prev => prev + 1)
-            }
-          }
-          return objectUrlOrOriginal
-        }
-
-        const worksWithObjectUrls = await Promise.all(
-          result.works.map(async work => ({
-            ...work,
-            thumbnail: await convertToObjectUrl(work.thumbnail),
-            logo: await convertToObjectUrl(work.logo)
-          }))
-        )
-
-        const inspiredByWithObjectUrls = await Promise.all(
-          result.inspiredBy.map(async item => ({
-            ...item,
-            icon: await convertToObjectUrl(item.icon)
-          }))
-        )
-
-        // アートワークを変換
-        const bgmWithObjectUrls = await Promise.all(
-          result.bgm.map(async track => ({
-            ...track,
-            artwork: await convertToObjectUrl(track.artwork)
-          }))
-        )
-
-        const processedData = {
-          ...result,
-          works: worksWithObjectUrls,
-          inspiredBy: inspiredByWithObjectUrls,
-          bgm: bgmWithObjectUrls
-        } satisfies PortfolioData
-
-        if (isDev) {
-          console.log(`✅ 画像プリロード完了（合計${total}件／ObjectURL生成済み）`)
-        }
-
-        if (isMounted) {
-          setPortfolioData(processedData)
-        }
-
-        // 取得できた2つの時刻レスポンスを計測し、RTTが最も小さい測定結果を採用
-
-        /** 時刻レスポンスを読み込み RTT/2補正後の『受信時点でのサーバー現在時刻』を算出する */
-        const measureServerTime = (
-          res: {
-            /** 時刻文字列のレスポンスデータ */
-            data: string
-          },
-          startPerf: number
-        ): {
-          /** ラウンドトリップタイム（ミリ秒） */
-          rtt: number
-          /** RTT/2で補正した受信時点でのサーバー現在時刻（ミリ秒） */
-          correctedCurrentMs: number
-        } => {
-          const text = res.data.trim().replace(/^"|"$/g, "")
-          const serverMs = new Date(text).getTime()
-          const endPerf = performance.now()
-          const rtt = endPerf - startPerf
-          const correctedCurrentMs = serverMs + rtt / 2
-          return { rtt, correctedCurrentMs }
-        }
-
-        const measurement1 = measureServerTime(timeResponse1, t0a)
-        const measurement2Start = performance.now()
-        const measurement2 = measureServerTime(timeResponse2, measurement2Start)
-        const best = measurement1.rtt <= measurement2.rtt ? measurement1 : measurement2
-        if (isMounted) {
-          setCurrentServerTime(new Date(best.correctedCurrentMs).toISOString())
-        }
-      } catch (e) {
-        console.error(e)
-        alert("APIにアクセスできませんでした")
-      }
+    /** 時刻レスポンスを読み込み、RTT/2で補正した受信時点のサーバー時刻を算出する */
+    const measure = async (res: Response, startPerf: number) => {
+      const text = (await res.text()).trim().replace(/^"|"$/g, "")
+      const serverMs = new Date(text).getTime()
+      const endPerf = performance.now()
+      const rtt = endPerf - startPerf
+      const correctedCurrentMs = serverMs + rtt / 2
+      return { rtt, correctedCurrentMs }
     }
 
-    fetchData()
+    const m1 = await measure(r1, t0a)
+    const m2Start = performance.now()
+    const m2 = await measure(r2, m2Start)
+    const best = m1.rtt <= m2.rtt ? m1 : m2
+    return new Date(best.correctedCurrentMs).toISOString()
+  })
 
-    return () => {
-      isMounted = false
-      // 生成したObjectURLをクリーンアップ
-      if (createdObjectUrls.length > 0) {
-        createdObjectUrls.forEach(url => URL.revokeObjectURL(url))
+  const totalMediaAssets = useMemo(() => {
+    if (baseData === undefined) {
+      return 0
+    }
+    return baseData.works.length * 2 + baseData.inspiredBy.length + baseData.bgm.length
+  }, [baseData])
+
+  const mediaDownloadStatus = useMemo(
+    () => ({
+      total: totalMediaAssets,
+      loaded: loadedMediaAssets,
+      progress: totalMediaAssets === 0 ? 0 : loadedMediaAssets / totalMediaAssets,
+      isComplete: totalMediaAssets > 0 && loadedMediaAssets >= totalMediaAssets
+    }),
+    [totalMediaAssets, loadedMediaAssets]
+  )
+
+  /** requestAnimationFrameを使って進捗をバッチ反映 */
+  const scheduleProgressFlush = useCallback(() => {
+    if (rafScheduledRef.current) {
+      return
+    }
+
+    rafScheduledRef.current = true
+    requestAnimationFrame(() => {
+      setLoadedMediaAssets(progressRef.current)
+      rafScheduledRef.current = false
+    })
+  }, [])
+
+  /** 単一メディア（画像）取得処理が成功・失敗を問わず終了したことを記録し、次フレームでバッチ反映をスケジュールする */
+  const markMediaFetchCompleted = useCallback(() => {
+    progressRef.current += 1
+    scheduleProgressFlush()
+  }, [scheduleProgressFlush])
+
+  /** 指定URLの画像を取得しObjectURLを生成 （失敗時は元URLを返す） */
+  const convertToObjectUrl = useCallback(
+    async (url: string): Promise<string> => {
+      let objectUrlOrOriginal = url
+      try {
+        const res = await fetch(getResourceUrl(url))
+        const blob = await res.blob()
+        objectUrlOrOriginal = URL.createObjectURL(blob)
+        createdObjectUrlListRef.current.push(objectUrlOrOriginal)
         if (isDev) {
-          console.log(`🧹 ObjectURLを解放：${createdObjectUrls.length}件`)
+          const parts = url.split("/")
+          const fileName = parts.length > 0 ? parts[parts.length - 1] : url
+          console.log(`  ✓ ${fileName} → ${objectUrlOrOriginal}`)
         }
+      } catch (error) {
+        if (isDev) {
+          console.error(`  ✗ ${url.split("/").pop()}`, error)
+        }
+      } finally {
+        markMediaFetchCompleted()
+      }
+      return objectUrlOrOriginal
+    },
+    [isDev, markMediaFetchCompleted]
+  )
+
+  /** 加工済みポートフォリオデータを生成するSWR二段目Fetcher */
+  const preloadPortfolioMedia = useCallback(
+    async (_key: [string, PortfolioData]): Promise<PortfolioData> => {
+      const raw = _key[1]
+
+      // 前回生成分を破棄
+      if (createdObjectUrlListRef.current.length > 0) {
+        createdObjectUrlListRef.current.forEach(url => URL.revokeObjectURL(url))
+        createdObjectUrlListRef.current = []
+      }
+
+      // 進捗初期化
+      progressRef.current = 0
+      setLoadedMediaAssets(0)
+      const total = raw.works.length * 2 + raw.inspiredBy.length + raw.bgm.length
+      if (isDev) {
+        console.log(`🖼️  画像プリロード開始（合計${total}件）`)
+      }
+
+      const worksWithObjectUrls = await Promise.all(
+        raw.works.map(async work => ({
+          ...work,
+          thumbnail: await convertToObjectUrl(work.thumbnail),
+          logo: await convertToObjectUrl(work.logo)
+        }))
+      )
+
+      const inspiredByWithObjectUrls = await Promise.all(
+        raw.inspiredBy.map(async item => ({
+          ...item,
+          icon: await convertToObjectUrl(item.icon)
+        }))
+      )
+
+      const bgmWithObjectUrls = await Promise.all(
+        raw.bgm.map(async track => ({
+          ...track,
+          artwork: await convertToObjectUrl(track.artwork)
+        }))
+      )
+
+      const processed: PortfolioData = {
+        ...raw,
+        works: worksWithObjectUrls,
+        inspiredBy: inspiredByWithObjectUrls,
+        bgm: bgmWithObjectUrls
+      }
+      if (isDev) {
+        console.log(`✅ 画像プリロード完了（合計${total}件／ObjectURL生成済み）`)
+      }
+      return processed
+    },
+    [convertToObjectUrl, isDev]
+  )
+
+  // 二段目SWR: baseDataが取得済みなら加工版を生成
+  const { data: portfolioData } = useSWRImmutable<PortfolioData>(
+    baseData === undefined ? null : ["processedPortfolio", baseData],
+    preloadPortfolioMedia
+  )
+
+  // アンマウント時・依存除去時にObjectURLを解放
+  useEffect(() => {
+    return () => {
+      if (createdObjectUrlListRef.current.length < 1) {
+        return
+      }
+
+      createdObjectUrlListRef.current.forEach(url => URL.revokeObjectURL(url))
+      if (isDev) {
+        console.log(`🧹 ObjectURLを解放：${createdObjectUrlListRef.current.length}件`)
       }
     }
   }, [isDev])
 
-  const mediaDownload = {
-    total: totalMediaAssets,
-    loaded: loadedMediaAssets,
-    progress: totalMediaAssets === 0 ? 0 : loadedMediaAssets / totalMediaAssets,
-    isComplete: totalMediaAssets > 0 && loadedMediaAssets >= totalMediaAssets
-  }
-
-  return { portfolioData, currentServerTime, mediaDownload } as const
+  return { portfolioData, currentServerTime, mediaDownloadStatus } as const
 }

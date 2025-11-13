@@ -20,7 +20,7 @@ const POST_LOAD_DELAY_MS = 1000
 
 /** App */
 export const App = () => {
-  const { portfolioData, currentServerTime, mediaDownload } = useDataFetch()
+  const { portfolioData, currentServerTime, mediaDownloadStatus } = useDataFetch()
   const {
     handleReady,
     handlePlayButtonClick,
@@ -33,7 +33,7 @@ export const App = () => {
   const [shouldPostLoadDelayExpired, setShouldPostLoadDelayExpired] = useState(false)
   const completedAtRef = useRef<number>(null)
   useEffect(() => {
-    if (!(mediaDownload.isComplete && completedAtRef.current === null)) {
+    if (!(mediaDownloadStatus.isComplete && completedAtRef.current === null)) {
       return
     }
 
@@ -41,7 +41,7 @@ export const App = () => {
     const id = setTimeout(() => setShouldPostLoadDelayExpired(true), POST_LOAD_DELAY_MS)
 
     return () => clearTimeout(id)
-  }, [mediaDownload.isComplete])
+  }, [mediaDownloadStatus.isComplete])
 
   const [youtubeAutoplay, setYoutubeAutoplay] = useState<0 | 1>(0)
   const [youtubeKey, setYoutubeKey] = useState<number>(0)
@@ -104,9 +104,9 @@ export const App = () => {
       {shouldShowWelcomeView && (
         <div ref={welcomeRef} className={styles.welcomeViewContainer}>
           <WelcomeView
-            isMediaLoading={!mediaDownload.isComplete || !shouldPostLoadDelayExpired}
+            isMediaLoading={!mediaDownloadStatus.isComplete || !shouldPostLoadDelayExpired}
             isPlayButtonShowsSpinner={isPlayButtonShowsSpinner}
-            mediaProgressPercent={mediaDownload.progress * 100}
+            mediaProgressPercent={mediaDownloadStatus.progress * 100}
             onPlayClick={onPlayClick}
             setIsMuted={setIsMuted}
           />
