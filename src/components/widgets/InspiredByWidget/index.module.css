@@ -1,0 +1,25 @@
+.inspiredByWidget {
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: var(--color-general-background-alpha);
+  }
+
+  > .icon {
+    display: inline-flex;
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: var(--color-general-gray);
+  }
+
+  > .label {
+    font-size: 0.625rem;
+    color: var(--color-general-gray);
+    text-decoration: underline;
+  }
+}

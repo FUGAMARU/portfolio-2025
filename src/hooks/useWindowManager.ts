@@ -31,7 +31,7 @@ export type WindowState = {
   /** ウィンドウID */
   id: string
   /** ウィンドウタイプ */
-  type: "basic-info" | "work-detail"
+  type: "basic-info" | "work-detail" | "inspired-by"
   /** 現在のX位置（ドラッグ移動後） */
   currentX: number
   /** 現在のY位置（ドラッグ移動後） - BasicInfoWindowのみoptional */
@@ -54,7 +54,7 @@ type WindowAction =
         /** ウィンドウID */
         id: string
         /** ウィンドウタイプ */
-        windowType: "basic-info" | "work-detail"
+        windowType: "basic-info" | "work-detail" | "inspired-by"
         /** 初期位置 */
         initialPosition?: Coordinates
       }
@@ -115,7 +115,7 @@ type WindowAction =
  */
 const getNewWindowPosition = (
   state: Array<WindowState>,
-  windowType: "basic-info" | "work-detail",
+  windowType: "basic-info" | "work-detail" | "inspired-by",
   initialPosition?: Coordinates
 ): Coordinates => {
   if (initialPosition !== undefined) {
@@ -237,6 +237,17 @@ export const useWindowManager = (initialState: Array<WindowState> = []) => {
     })
   }, [])
 
+  /** InspiredByウィジェット押下時の処理 */
+  const handleInspiredByWidgetClick = useCallback(() => {
+    dispatch({
+      type: "OPEN_WINDOW",
+      payload: {
+        id: "inspired-by",
+        windowType: "inspired-by"
+      }
+    })
+  }, [])
+
   const windowActions = {
     close: useCallback((windowId: string) => {
       dispatch({ type: "CLOSE_WINDOW", payload: { id: windowId } })
@@ -290,6 +301,7 @@ export const useWindowManager = (initialState: Array<WindowState> = []) => {
     windowManagerState,
     basicInfoWindow,
     handleWorkButtonClick,
+    handleInspiredByWidgetClick,
     windowActions,
     getVisibleWorkDetailWindows
   }

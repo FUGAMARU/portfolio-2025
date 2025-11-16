@@ -1,6 +1,7 @@
 import clsx from "clsx"
 
 import styles from "@/components/views/MainView/index.module.css"
+import { InspiredBy } from "@/components/widgets/InspiredByWidget"
 import { LoadingStatusWidget } from "@/components/widgets/LoadingStatusWidget"
 import { StarWidget } from "@/components/widgets/StarWidget"
 import { WorksWidget } from "@/components/widgets/WorksWidget"
@@ -10,6 +11,8 @@ import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
 import { useWindowManager, WINDOW_POSITION } from "@/hooks/useWindowManager"
 
 import type { PortfolioData } from "@/hooks/useDataFetch"
+
+import { InspiredByWindow } from "@/components/windows/InspiredByWindow"
 
 /** Props */
 type Props = {
@@ -30,26 +33,31 @@ export const MainView = ({
   currentServerTime,
   isMuted = false
 }: Props) => {
-  const { basicInfoWindow, handleWorkButtonClick, windowActions, getVisibleWorkDetailWindows } =
-    useWindowManager([
-      // BasicInfoWindowを初期状態で開いておく
-      {
-        id: "basic-info",
-        type: "basic-info",
-        currentX: 48,
-        currentY: undefined, // bottomで位置指定するためundefinedにする
-        zIndex: 1,
-        isVisible: true,
-        isFullScreen: false
-      }
-    ])
+  const {
+    basicInfoWindow,
+    handleWorkButtonClick,
+    handleInspiredByWidgetClick,
+    windowActions,
+    getVisibleWorkDetailWindows,
+    windowManagerState
+  } = useWindowManager([
+    // BasicInfoWindowを初期状態で開いておく
+    {
+      id: "basic-info",
+      type: "basic-info",
+      currentX: 48,
+      currentY: undefined, // bottomで位置指定するためundefinedにする
+      zIndex: 1,
+      isVisible: true,
+      isFullScreen: false
+    }
+  ])
 
   const visibleWorkDetailWindows = getVisibleWorkDetailWindows(portfolioData?.works ?? [])
 
   if (portfolioData === undefined) {
     return null
   }
-
   return (
     <div className={styles.mainView}>
       {shouldRenderWindows && (
@@ -91,6 +99,29 @@ export const MainView = ({
           worksData={portfolioData.works}
         />
       </div>
+
+      <div className={styles.inspired}>
+        <InspiredBy onClick={handleInspiredByWidgetClick} />
+      </div>
+      {shouldRenderWindows &&
+        (() => {
+          const win = windowManagerState.find(w => w.id === "inspired-by")
+          if (win === undefined || !win.isVisible) {
+            return null
+          }
+          return (
+            <InspiredByWindow
+              left={win.currentX}
+              onClose={() => windowActions.close("inspired-by")}
+              onFocus={() => windowActions.focus("inspired-by")}
+              onMaximize={() => windowActions.maximize("inspired-by")}
+              onMinimize={() => windowActions.minimize("inspired-by")}
+              onPositionChange={position => windowActions.updatePosition("inspired-by", position)}
+              top={win.currentY ?? WINDOW_POSITION.INITIAL_TOP}
+              zIndex={win.zIndex}
+            />
+          )
+        })()}
 
       {shouldRenderWindows &&
         visibleWorkDetailWindows.map(({ windowState, workData }) => (
