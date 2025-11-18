@@ -1,4 +1,5 @@
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
+import styles from "@/components/windows/InspiredByWindow/index.module.css"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { ComponentProps } from "react"
@@ -19,7 +20,9 @@ export const InspiredByWindow = ({ ...windowContainerProps }: Props) => {
       isFullScreen={false}
       {...windowContainerProps}
     >
-      <div>Hello World</div>
+      <div className={styles.inspiredByWindow}>
+        <p className={styles.title}>This portfolio was inspired by …</p>
+      </div>
     </WindowContainer>
   )
 }

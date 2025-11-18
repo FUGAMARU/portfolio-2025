@@ -1,0 +1,19 @@
+.inspiredByWindow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.5rem;
+
+  > .title {
+    font-family: Urbanist, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: transparent; /* Makes gradient visible */
+    background: linear-gradient(
+      to right,
+      var(--color-general-pale-pink),
+      var(--color-general-pale-aqua)
+    );
+    background-clip: text;
+  }
+}
