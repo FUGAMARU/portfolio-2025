@@ -6,13 +6,12 @@ import { LoadingStatusWidget } from "@/components/widgets/LoadingStatusWidget"
 import { StarWidget } from "@/components/widgets/StarWidget"
 import { WorksWidget } from "@/components/widgets/WorksWidget"
 import { BasicInfoWindow } from "@/components/windows/BasicInfoWindow"
+import { InspiredByWindow } from "@/components/windows/InspiredByWindow"
 import { PlayerWindow } from "@/components/windows/PlayerWindow"
 import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
 import { useWindowManager, WINDOW_POSITION } from "@/hooks/useWindowManager"
 
 import type { PortfolioData } from "@/hooks/useDataFetch"
-
-import { InspiredByWindow } from "@/components/windows/InspiredByWindow"
 
 /** Props */
 type Props = {
@@ -58,6 +57,7 @@ export const MainView = ({
   if (portfolioData === undefined) {
     return null
   }
+
   return (
     <div className={styles.mainView}>
       {shouldRenderWindows && (
@@ -111,6 +111,7 @@ export const MainView = ({
           }
           return (
             <InspiredByWindow
+              inspiredBy={portfolioData.inspiredBy}
               left={win.currentX}
               onClose={() => windowActions.close("inspired-by")}
               onFocus={() => windowActions.focus("inspired-by")}

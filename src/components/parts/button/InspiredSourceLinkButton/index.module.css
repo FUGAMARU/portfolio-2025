@@ -1,0 +1,50 @@
+.linkButton {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 12px;
+  background-color: var(--color-general-rich-yellow-alpha-20);
+  border: solid 0.5px var(--color-general-rich-yellow);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+
+  > .icon {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border: solid 1px var(--color-general-bitter-yellow);
+    border-radius: 50%;
+  }
+
+  > .right {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    > .type {
+      width: fit-content;
+      padding: 2px 4px;
+      font-family: "x14y24pxHeadUpDaisy", monospace;
+      font-size: 9px;
+      line-height: 1;
+      color: var(--color-general-dark);
+      border-radius: 2px;
+
+      &.Background {
+        background-color: var(--color-general-pale-green);
+      }
+
+      &.Visual {
+        background-color: var(--color-general-pale-aqua);
+      }
+
+      &.Font {
+        background-color: var(--color-general-pale-pink);
+      }
+    }
+
+    > .label {
+      font-size: 14px;
+    }
+  }
+}

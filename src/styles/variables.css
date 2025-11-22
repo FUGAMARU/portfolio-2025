@@ -2,7 +2,9 @@
   /* 色 */
   --color-general-white: #fff;
   --color-general-gray: #c5c5c5;
+  --color-general-dark: #484848;
   --color-general-rich-yellow: #ffebd0;
+  --color-general-rich-yellow-alpha-20: rgb(255 235 208 / 20%);
   --color-general-rich-yellow-alpha-50: rgb(255 235 208 / 50%);
   --color-general-pale-green: #a3eecc;
   --color-general-pale-aqua: #adfaff;
