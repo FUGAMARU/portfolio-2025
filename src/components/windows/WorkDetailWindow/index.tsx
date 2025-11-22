@@ -3,8 +3,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
-import windowContainerStyles from "@/components/parts/window/WindowContainer/index.module.css"
 import styles from "@/components/windows/WorkDetailWindow/index.module.css"
+import { useWindowScale } from "@/hooks/useWindowScale"
 import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
@@ -40,7 +40,7 @@ export const WorkDetailWindow = ({
   const thumbRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
-  const [windowScale, setWindowScale] = useState(1)
+  const windowScale = useWindowScale(rootRef)
   const [dynamicMaxHeight, setDynamicMaxHeight] = useState<number>()
   /** カスタムスクロールバーの状態 */
   const [scrollbarState, setScrollbarState] = useState<{
@@ -52,25 +52,21 @@ export const WorkDetailWindow = ({
     translateY: number
   }>({ isHidden: true, height: 0, translateY: 0 })
 
-  // WindowContainerの幅を基準に要素をスケール
+  // WindowContainerの高さ変化に応じて説明文のmax-heightを拡張
   useLayoutEffect(() => {
     const rootElement = rootRef.current
     if (rootElement === null) {
       return
     }
 
-    const windowElement = rootElement.closest(`.${windowContainerStyles.windowContainer}`)
+    const windowElement = rootElement.parentElement
     if (windowElement === null) {
       return
     }
 
-    let baseWidth: number | undefined
     let baseHeight: number | undefined
     const resizeObserver = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect
-      if (baseWidth === undefined) {
-        baseWidth = width
-      }
+      const { height } = entry.contentRect
 
       if (baseHeight === undefined) {
         baseHeight = height
@@ -83,11 +79,6 @@ export const WorkDetailWindow = ({
         }
       }
 
-      if (baseWidth > 0) {
-        const nextScale = Math.max(1, width / baseWidth)
-        setWindowScale(nextScale)
-      }
-
       if (baseHeight !== undefined) {
         const INITIAL_MAX = initialMaxHeightRef.current ?? INITIAL_DESCRIPTION_MAX_REM * 16 // 1rem = 16px
         const extra = Math.max(0, height - baseHeight)
@@ -95,6 +86,7 @@ export const WorkDetailWindow = ({
         setDynamicMaxHeight(target)
       }
     })
+
     resizeObserver.observe(windowElement)
 
     return () => resizeObserver.disconnect()

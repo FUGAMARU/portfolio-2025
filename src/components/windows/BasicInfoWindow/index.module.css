@@ -3,8 +3,6 @@
   flex-direction: column;
   width: fit-content;
 
-  --window-scale: var(--window-scale, 1);
-
   > .name {
     font-family: Urbanist, sans-serif;
     font-size: calc(5rem * var(--window-scale));

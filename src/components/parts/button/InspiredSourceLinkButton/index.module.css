@@ -1,31 +1,31 @@
 .linkButton {
   display: inline-flex;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
-  padding: 4px 12px;
+  padding: 0.25rem 0.75rem;
   background-color: var(--color-general-rich-yellow-alpha-20);
   border: solid 0.5px var(--color-general-rich-yellow);
   border-radius: 8px;
   backdrop-filter: blur(4px);
 
   > .icon {
-    width: 32px;
-    height: 32px;
+    width: 2rem;
+    height: 2rem;
     object-fit: cover;
-    border: solid 1px var(--color-general-bitter-yellow);
+    border: solid 0.0625rem var(--color-general-bitter-yellow);
     border-radius: 50%;
   }
 
   > .right {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 0.3125rem;
 
     > .type {
       width: fit-content;
-      padding: 2px 4px;
+      padding: 0.125rem 0.25rem;
       font-family: "x14y24pxHeadUpDaisy", monospace;
-      font-size: 9px;
+      font-size: 0.5625rem;
       line-height: 1;
       color: var(--color-general-dark);
       border-radius: 2px;
@@ -44,7 +44,7 @@
     }
 
     > .label {
-      font-size: 14px;
+      font-size: 0.875rem;
     }
   }
 }

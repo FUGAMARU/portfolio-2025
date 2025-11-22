@@ -5,11 +5,9 @@
   width: calc(40rem * var(--window-scale));
   padding-top: calc(0.5rem * var(--window-scale));
 
-  --window-scale: var(--window-scale, 1);
-
   > .title {
     font-family: Urbanist, sans-serif;
-    font-size: 1.125rem;
+    font-size: calc(1.125rem * var(--window-scale));
     font-weight: 700;
     color: transparent;
     background: linear-gradient(
