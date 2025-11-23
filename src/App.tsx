@@ -20,7 +20,8 @@ const POST_LOAD_DELAY_MS = 1000
 
 /** App */
 export const App = () => {
-  const { portfolioData, currentServerTime, mediaDownloadStatus } = useDataFetch()
+  const [isWarn, setIsWarn] = useState(false)
+  const { portfolioData, currentServerTime, mediaDownloadStatus } = useDataFetch(!isWarn)
   const {
     handleReady,
     handlePlayButtonClick,
@@ -106,9 +107,11 @@ export const App = () => {
           <WelcomeView
             isMediaLoading={!mediaDownloadStatus.isComplete || !shouldPostLoadDelayExpired}
             isPlayButtonShowsSpinner={isPlayButtonShowsSpinner}
+            isWarn={isWarn}
             mediaProgressPercent={mediaDownloadStatus.progress * 100}
             onPlayClick={onPlayClick}
             setIsMuted={setIsMuted}
+            setIsWarn={setIsWarn}
           />
         </div>
       )}

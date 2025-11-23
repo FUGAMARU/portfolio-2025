@@ -88,8 +88,12 @@ export type PortfolioData = {
   works: Array<Work>
 }
 
-/** データフェッチフック */
-export const useDataFetch = () => {
+/**
+ * データフェッチフック
+ *
+ * @param shouldFetch - true のときのみフェッチ処理を実行する
+ */
+export const useDataFetch = (shouldFetch: boolean = true) => {
   const [loadedMediaAssets, setLoadedMediaAssets] = useState<number>(0)
   const createdObjectUrlListRef = useRef<Array<string>>([])
   const progressRef = useRef<number>(0)
@@ -97,38 +101,44 @@ export const useDataFetch = () => {
   const isDev = import.meta.env.DEV
 
   // ベースデータ
-  const { data: baseData } = useSWRImmutable<PortfolioData>("/", async (key: string) => {
-    const res = await fetch(getResourceUrl(key), { cache: "no-store" })
-    if (!res.ok) {
-      throw new Error("APIフェッチに失敗しました")
+  const { data: baseData } = useSWRImmutable<PortfolioData>(
+    shouldFetch ? "/" : null,
+    async (key: string) => {
+      const res = await fetch(getResourceUrl(key), { cache: "no-store" })
+      if (!res.ok) {
+        throw new Error("APIフェッチに失敗しました")
+      }
+      return res.json() as Promise<PortfolioData>
     }
-    return res.json() as Promise<PortfolioData>
-  })
+  )
 
   // RTT補正済みのサーバ時刻
-  const { data: currentServerTime } = useSWRImmutable<string>("/time/corrected", async () => {
-    const t0a = performance.now()
-    const [r1, r2] = await Promise.all([
-      fetch(getResourceUrl("/time"), { cache: "no-store" }),
-      fetch(getResourceUrl("/time"), { cache: "no-store" })
-    ])
+  const { data: currentServerTime } = useSWRImmutable<string>(
+    shouldFetch ? "/time/corrected" : null,
+    async () => {
+      const t0a = performance.now()
+      const [r1, r2] = await Promise.all([
+        fetch(getResourceUrl("/time"), { cache: "no-store" }),
+        fetch(getResourceUrl("/time"), { cache: "no-store" })
+      ])
 
-    /** 時刻レスポンスを読み込み、RTT/2で補正した受信時点のサーバー時刻を算出する */
-    const measure = async (res: Response, startPerf: number) => {
-      const text = (await res.text()).trim().replace(/^"|"$/g, "")
-      const serverMs = new Date(text).getTime()
-      const endPerf = performance.now()
-      const rtt = endPerf - startPerf
-      const correctedCurrentMs = serverMs + rtt / 2
-      return { rtt, correctedCurrentMs }
+      /** 時刻レスポンスを読み込み、RTT/2で補正した受信時点のサーバー時刻を算出する */
+      const measure = async (res: Response, startPerf: number) => {
+        const text = (await res.text()).trim().replace(/^"|"$/g, "")
+        const serverMs = new Date(text).getTime()
+        const endPerf = performance.now()
+        const rtt = endPerf - startPerf
+        const correctedCurrentMs = serverMs + rtt / 2
+        return { rtt, correctedCurrentMs }
+      }
+
+      const m1 = await measure(r1, t0a)
+      const m2Start = performance.now()
+      const m2 = await measure(r2, m2Start)
+      const best = m1.rtt <= m2.rtt ? m1 : m2
+      return new Date(best.correctedCurrentMs).toISOString()
     }
-
-    const m1 = await measure(r1, t0a)
-    const m2Start = performance.now()
-    const m2 = await measure(r2, m2Start)
-    const best = m1.rtt <= m2.rtt ? m1 : m2
-    return new Date(best.correctedCurrentMs).toISOString()
-  })
+  )
 
   const totalMediaAssets = useMemo(() => {
     if (baseData === undefined) {

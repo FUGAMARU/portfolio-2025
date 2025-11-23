@@ -1,0 +1,68 @@
+.warnWindow {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+
+  > .upper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+
+    > .icon {
+      width: 3.125rem;
+      height: 3.125rem;
+      fill: var(--color-general-rich-yellow);
+    }
+
+    > .message {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+
+      > .title {
+        font-size: 1rem;
+      }
+
+      > .caption {
+        font-size: 0.6875rem;
+        color: var(--color-general-gray);
+      }
+    }
+  }
+
+  > .requirements {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* stylelint-disable-next-line no-descending-specificity */
+    > .title {
+      padding: 0.25rem 0.75rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.625rem;
+      line-height: 1;
+      color: var(--color-general-rich-yellow);
+      text-align: center;
+      background-color: var(--color-general-rich-yellow-alpha-30);
+      border-radius: 4px;
+    }
+
+    > .info {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.625rem;
+
+      &.Secondary {
+        margin-top: 0.25rem;
+      }
+
+      > .divider {
+        width: 0.0625rem;
+        background-color: var(--color-general-white);
+      }
+    }
+  }
+}

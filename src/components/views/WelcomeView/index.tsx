@@ -1,23 +1,20 @@
-import clsx from "clsx"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { SoundActionButton } from "@/components/parts/button/SoundActionButton"
-import { ProgressBar } from "@/components/parts/ProgressBar"
-import { WindowContainer } from "@/components/parts/window/WindowContainer"
-import { DiscIcon } from "@/components/views/WelcomeView/DiscIcon"
-import styles from "@/components/views/WelcomeView/index.module.css"
+import { WarnWindow } from "@/components/windows/WarnWindow"
+import { WelcomeWindow } from "@/components/windows/WelcomeWindow"
 
 import type { Dispatch, SetStateAction } from "react"
 
-/** フェードアウトアニメーションのDuration (ms) */
-const FADE_OUT_DURATION_MS = 1000
-
 /** Props */
 type Props = {
-  /** メディアロード中か */
+  /** メディアのロード中かどうか */
   isMediaLoading: boolean
   /** メディアの読み込みの進捗（0-100%） */
   mediaProgressPercent: number
+  /** isWarn の状態（親管理） */
+  isWarn: boolean
+  /** isWarn の状態を更新する関数（親から受け取る） */
+  setIsWarn: Dispatch<SetStateAction<boolean>>
   /** setIsMuted */
   setIsMuted: Dispatch<SetStateAction<boolean | undefined>>
   /** Playボタン押下時に実行（再生開始処理を委譲） */
@@ -30,93 +27,76 @@ type Props = {
 export const WelcomeView = ({
   isMediaLoading,
   isPlayButtonShowsSpinner,
+  isWarn,
   mediaProgressPercent,
+  setIsWarn,
   onPlayClick,
   setIsMuted
 }: Props) => {
-  const [transitionPhase, setTransitionPhase] = useState<
-    "loading" | "crossfade" | "actions-visible"
-  >(isMediaLoading ? "loading" : "actions-visible")
-  const timeoutRef = useRef<number>(null)
+  const [isChromium] = useState<boolean | undefined>(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return undefined
+    }
 
-  // フェードアニメーションの制御
+    const ua = navigator.userAgent.toLowerCase()
+    const isEdge = ua.includes("edg/")
+    const isChrome = ua.includes("chrome") && !ua.includes("edg/") && !ua.includes("opr/")
+    const isOpera = ua.includes("opr/") || ua.includes("opera")
+
+    return isEdge || isChrome || isOpera
+  })
+
+  const [viewport, setViewport] = useState<
+    | {
+        /** 幅 */
+        width: number
+        /** 高さ */
+        height: number
+      }
+    | undefined
+  >()
+
   useEffect(() => {
-    if (!isMediaLoading) {
-      requestAnimationFrame(() => {
-        setTransitionPhase("crossfade")
-        timeoutRef.current = window.setTimeout(() => {
-          setTransitionPhase("actions-visible")
-        }, FADE_OUT_DURATION_MS)
-      })
+    /** リサイズした時の処理 */
+    const handleResize = () => {
+      setViewport({ width: window.innerWidth, height: window.innerHeight })
+    }
+
+    if (typeof window === "undefined") {
       return
     }
 
-    if (timeoutRef.current !== null) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-    requestAnimationFrame(() => {
-      setTransitionPhase("loading")
-    })
+    // useSyncExternalStoreを使用するとうまくいかなかった
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-initialize-state
+    handleResize()
 
-    return () => {
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
-    }
-  }, [isMediaLoading])
+    window.addEventListener("resize", handleResize)
+
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  const isWarnInitial =
+    !(isChromium ?? false) || (viewport?.width ?? 0) < 1280 || (viewport?.height ?? 0) < 720
+
+  useEffect(() => {
+    // 親でstateを一括管理しつつブラウザ依存ロジックはWelcomeView内に閉じ込めたい設計のため警告は無視
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-live-state-to-parent
+    setIsWarn(isWarnInitial)
+  }, [isWarnInitial, setIsWarn])
 
   return (
-    <WindowContainer hasWindowControl={false} isFixed isFullScreen={false}>
-      <div className={styles.welcomeView}>
-        <div className={styles.upper}>
-          <span className={styles.icon}>
-            <DiscIcon />
-          </span>
-          <p className={styles.title}>
-            BGMをオンにして
-            <br />
-            FUGAMARU.COMの世界観をお楽しみください
-          </p>
-          <p className={styles.caption}>Enjoy the atmosphere with BGM</p>
-        </div>
-
-        <div className={styles.lower}>
-          <div className={styles.inner}>
-            {(transitionPhase === "loading" || transitionPhase === "crossfade") && (
-              <div
-                className={clsx(
-                  styles.layer,
-                  styles.fetching,
-                  transitionPhase === "crossfade" && styles.Hidden
-                )}
-              >
-                <ProgressBar hasEasing progress={mediaProgressPercent} />
-                <span className={styles.label}>
-                  リソースを読み込み中… ({(mediaProgressPercent ?? 0).toFixed(1)}%)
-                </span>
-              </div>
-            )}
-            {(transitionPhase === "crossfade" || transitionPhase === "actions-visible") && (
-              <div
-                className={clsx(
-                  styles.layer,
-                  styles.actions,
-                  transitionPhase === "actions-visible" && styles.Visible
-                )}
-              >
-                <SoundActionButton
-                  displayType="on"
-                  onClick={() => (onPlayClick !== undefined ? onPlayClick() : setIsMuted(false))}
-                  shouldShowSpinner={isPlayButtonShowsSpinner}
-                />
-                <SoundActionButton displayType="off" onClick={() => setIsMuted(true)} />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </WindowContainer>
+    <>
+      {isWarn ? (
+        <WarnWindow />
+      ) : (
+        <WelcomeWindow
+          isMediaLoading={isMediaLoading}
+          isPlayButtonShowsSpinner={isPlayButtonShowsSpinner}
+          mediaProgressPercent={mediaProgressPercent}
+          onPlayClick={onPlayClick}
+          setIsMuted={setIsMuted}
+        />
+      )}
+    </>
   )
 }
