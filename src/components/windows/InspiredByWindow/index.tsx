@@ -11,7 +11,7 @@ import type { ComponentProps } from "react"
 /** Props */
 type Props = Pick<
   ComponentProps<typeof WindowContainer>,
-  "left" | "top" | "zIndex" | "onPositionChange" | "onFocus"
+  "left" | "top" | "zIndex" | "onPositionChange" | "onFocus" | "isFullScreen"
 > &
   Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMinimize" | "onMaximize"> & {
     /** InspiredBy用データ */
@@ -21,15 +21,10 @@ type Props = Pick<
 /** InspiredByウィンドウ */
 export const InspiredByWindow = ({ inspiredBy, ...windowContainerProps }: Props) => {
   const rootRef = useRef<HTMLDivElement>(null)
-  const windowScale = useWindowScale(rootRef)
+  const windowScale = useWindowScale(rootRef, windowContainerProps.isFullScreen)
 
   return (
-    <WindowContainer
-      hasWindowControl
-      isFixed={false}
-      isFullScreen={false}
-      {...windowContainerProps}
-    >
+    <WindowContainer hasWindowControl isFixed={false} {...windowContainerProps}>
       <div
         ref={rootRef}
         className={styles.inspiredByWindow}

@@ -112,6 +112,7 @@ export const MainView = ({
           return (
             <InspiredByWindow
               inspiredBy={portfolioData.inspiredBy}
+              isFullScreen={win.isFullScreen ?? false}
               left={win.currentX}
               onClose={() => windowActions.close("inspired-by")}
               onFocus={() => windowActions.focus("inspired-by")}
@@ -128,6 +129,7 @@ export const MainView = ({
         visibleWorkDetailWindows.map(({ windowState, workData }) => (
           <WorkDetailWindow
             key={windowState.id}
+            isFullScreen={windowState.isFullScreen ?? false}
             left={windowState.currentX}
             onClose={() => windowActions.close(workData.id)}
             onFocus={() => windowActions.focus(workData.id)}

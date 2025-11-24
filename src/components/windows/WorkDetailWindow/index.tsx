@@ -21,7 +21,7 @@ type Props = Work &
   Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
   Pick<
     ComponentProps<typeof WindowContainer>,
-    "left" | "top" | "onPositionChange" | "zIndex" | "onFocus"
+    "left" | "top" | "onPositionChange" | "zIndex" | "onFocus" | "isFullScreen"
   >
 
 /** 作品詳細ウィンドウ */
@@ -40,7 +40,7 @@ export const WorkDetailWindow = ({
   const thumbRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
-  const windowScale = useWindowScale(rootRef)
+  const windowScale = useWindowScale(rootRef, windowContainerProps.isFullScreen)
   const [dynamicMaxHeight, setDynamicMaxHeight] = useState<number>()
   /** カスタムスクロールバーの状態 */
   const [scrollbarState, setScrollbarState] = useState<{
@@ -193,7 +193,6 @@ export const WorkDetailWindow = ({
     <WindowContainer
       hasWindowControl
       isFixed={false}
-      isFullScreen={false}
       onFocus={onFocus}
       zIndex={zIndex}
       {...windowContainerProps}

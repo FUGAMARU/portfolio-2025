@@ -48,7 +48,7 @@ export const BasicInfoWindow = ({
   const [shouldDisplay, setShouldDisplay] = useState(true)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const windowScale = useWindowScale(containerRef)
+  const windowScale = useWindowScale(containerRef, externalIsFullScreen ?? isFullScreen)
 
   if (!shouldDisplay) {
     return null
