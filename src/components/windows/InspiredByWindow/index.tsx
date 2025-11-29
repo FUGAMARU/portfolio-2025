@@ -11,11 +11,13 @@ import type { ComponentProps } from "react"
 /** Props */
 type Props = Pick<
   ComponentProps<typeof WindowContainer>,
-  "left" | "top" | "zIndex" | "onPositionChange" | "onFocus" | "isFullScreen"
+  "left" | "top" | "zIndex" | "onPositionChange" | "onFocus" | "isFullScreen" | "beforeMaximize"
 > &
   Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMinimize" | "onMaximize"> & {
     /** InspiredBy用データ */
     inspiredBy: Array<ComponentProps<typeof InspiredSourceLinkButton>>
+    /** 最大化前状態をクリアするコールバック */
+    onClearBeforeMaximize?: () => void
   }
 
 /** InspiredByウィンドウ */

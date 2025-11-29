@@ -78,12 +78,14 @@ export const MainView = ({
       {basicInfoWindow !== undefined && basicInfoWindow.isVisible && (
         <BasicInfoWindow
           basicInfo={portfolioData.basicInfo}
+          beforeMaximize={basicInfoWindow.beforeMaximize}
           bottom={basicInfoWindow.currentY === undefined ? 48 : undefined}
           isFullScreen={basicInfoWindow.isFullScreen ?? false}
           left={basicInfoWindow.currentX}
+          onClearBeforeMaximize={() => windowActions.clearBeforeMaximize("basic-info")}
           onClose={() => windowActions.close("basic-info")}
           onFocus={() => windowActions.focus("basic-info")}
-          onMaximize={() => windowActions.maximize("basic-info")}
+          onMaximize={info => windowActions.maximize("basic-info", info)}
           onMinimize={() => windowActions.minimize("basic-info")}
           onPositionChange={position => windowActions.updatePosition("basic-info", position)}
           shouldAppear={shouldRenderWindows}
@@ -111,12 +113,14 @@ export const MainView = ({
           }
           return (
             <InspiredByWindow
+              beforeMaximize={win.beforeMaximize}
               inspiredBy={portfolioData.inspiredBy}
               isFullScreen={win.isFullScreen ?? false}
               left={win.currentX}
+              onClearBeforeMaximize={() => windowActions.clearBeforeMaximize("inspired-by")}
               onClose={() => windowActions.close("inspired-by")}
               onFocus={() => windowActions.focus("inspired-by")}
-              onMaximize={() => windowActions.maximize("inspired-by")}
+              onMaximize={info => windowActions.maximize("inspired-by", info)}
               onMinimize={() => windowActions.minimize("inspired-by")}
               onPositionChange={position => windowActions.updatePosition("inspired-by", position)}
               top={win.currentY ?? WINDOW_POSITION.INITIAL_TOP}
@@ -129,11 +133,13 @@ export const MainView = ({
         visibleWorkDetailWindows.map(({ windowState, workData }) => (
           <WorkDetailWindow
             key={windowState.id}
+            beforeMaximize={windowState.beforeMaximize}
             isFullScreen={windowState.isFullScreen ?? false}
             left={windowState.currentX}
+            onClearBeforeMaximize={() => windowActions.clearBeforeMaximize(workData.id)}
             onClose={() => windowActions.close(workData.id)}
             onFocus={() => windowActions.focus(workData.id)}
-            onMaximize={() => windowActions.maximize(workData.id)}
+            onMaximize={info => windowActions.maximize(workData.id, info)}
             onMinimize={() => windowActions.minimize(workData.id)}
             onPositionChange={position => windowActions.updatePosition(workData.id, position)}
             top={windowState.currentY ?? WINDOW_POSITION.INITIAL_TOP}

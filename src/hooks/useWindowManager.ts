@@ -1,5 +1,7 @@
 import { useCallback, useReducer } from "react"
 
+import type { SizeLocationInfo } from "@/types"
+
 /** ウィンドウの位置 */
 const WINDOW_POSITION = {
   /** 初期位置（左端） */
@@ -19,12 +21,7 @@ const BOUNDARY_CHECK = {
 } as const
 
 /** 座標 */
-type Coordinates = {
-  /** x */
-  x: number
-  /** y */
-  y: number
-}
+type Coordinates = Pick<SizeLocationInfo, "x" | "y">
 
 /** ウィンドウ状態 */
 export type WindowState = {
@@ -42,6 +39,8 @@ export type WindowState = {
   isVisible: boolean
   /** フルスクリーンかどうか */
   isFullScreen?: boolean
+  /** 最大化前の位置とサイズ（最大化解除時に復元するため） */
+  beforeMaximize?: SizeLocationInfo
 }
 
 /** ウィンドウアクション一覧 */
@@ -98,6 +97,17 @@ type WindowAction =
   | {
       /** フルスクリーン状態を切り替え */
       type: "TOGGLE_FULLSCREEN"
+      /** ペイロード */
+      payload: {
+        /** ウィンドウID */
+        id: string
+        /** 最大化前のサイズと位置（最大化する時のみ） */
+        beforeMaximize?: SizeLocationInfo
+      }
+    }
+  | {
+      /** 最大化前の状態をクリア */
+      type: "CLEAR_BEFORE_MAXIMIZE"
       /** ペイロード */
       payload: {
         /** ウィンドウID */
@@ -210,11 +220,48 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
       )
     }
 
-    case "TOGGLE_FULLSCREEN":
+    case "TOGGLE_FULLSCREEN": {
+      const { id, beforeMaximize } = action.payload
+      return state.map(window => {
+        if (window.id !== id) {
+          return window
+        }
+
+        const isCurrentlyFullScreen = window.isFullScreen ?? false
+
+        // 最大化する場合: 現在の状態を保存
+        if (!isCurrentlyFullScreen && beforeMaximize !== undefined) {
+          return {
+            ...window,
+            isFullScreen: true,
+            beforeMaximize
+          }
+        }
+
+        // 最大化解除する場合: 保存された状態に復元
+        if (isCurrentlyFullScreen && window.beforeMaximize !== undefined) {
+          const restoredState = window.beforeMaximize
+          return {
+            ...window,
+            isFullScreen: false,
+            currentX: restoredState.x,
+            currentY: restoredState.y,
+            // beforeMaximizeを残したまま復元（WindowContainerで使用するため）
+            beforeMaximize: restoredState
+          }
+        }
+
+        // フォールバック: 単純にトグル
+        return {
+          ...window,
+          isFullScreen: !isCurrentlyFullScreen
+        }
+      })
+    }
+
+    case "CLEAR_BEFORE_MAXIMIZE":
       return state.map(window =>
-        window.id === action.payload.id
-          ? { ...window, isFullScreen: !(window.isFullScreen ?? false) }
-          : window
+        window.id === action.payload.id ? { ...window, beforeMaximize: undefined } : window
       )
 
     default:
@@ -257,8 +304,8 @@ export const useWindowManager = (initialState: Array<WindowState> = []) => {
       dispatch({ type: "MINIMIZE_WINDOW", payload: { id: windowId } })
     }, []),
 
-    maximize: useCallback((windowId: string) => {
-      dispatch({ type: "TOGGLE_FULLSCREEN", payload: { id: windowId } })
+    maximize: useCallback((windowId: string, beforeMaximize?: SizeLocationInfo) => {
+      dispatch({ type: "TOGGLE_FULLSCREEN", payload: { id: windowId, beforeMaximize } })
     }, []),
 
     updatePosition: useCallback((windowId: string, position: Coordinates) => {
@@ -270,6 +317,10 @@ export const useWindowManager = (initialState: Array<WindowState> = []) => {
 
     focus: useCallback((windowId: string) => {
       dispatch({ type: "BRING_TO_FRONT", payload: { id: windowId } })
+    }, []),
+
+    clearBeforeMaximize: useCallback((windowId: string) => {
+      dispatch({ type: "CLEAR_BEFORE_MAXIMIZE", payload: { id: windowId } })
     }, [])
   }
 

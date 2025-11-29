@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { WarnWindow } from "@/components/windows/WarnWindow"
 import { WelcomeWindow } from "@/components/windows/WelcomeWindow"
 
+import type { SizeLocationInfo } from "@/types"
 import type { Dispatch, SetStateAction } from "react"
 
 /** Props */
@@ -46,15 +47,7 @@ export const WelcomeView = ({
     return isEdge || isChrome || isOpera
   })
 
-  const [viewport, setViewport] = useState<
-    | {
-        /** 幅 */
-        width: number
-        /** 高さ */
-        height: number
-      }
-    | undefined
-  >()
+  const [viewport, setViewport] = useState<Pick<SizeLocationInfo, "width" | "height"> | undefined>()
 
   useEffect(() => {
     /** リサイズした時の処理 */

@@ -11,6 +11,7 @@ import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { PortfolioData } from "@/hooks/useDataFetch"
+import type { SizeLocationInfo } from "@/types"
 import type { ComponentProps } from "react"
 
 /** Props */
@@ -27,8 +28,12 @@ type Props = {
   | "onFocus"
   | "onPositionChange"
   | "shouldAppear"
+  | "beforeMaximize"
 > &
-  Partial<ComponentProps<typeof WindowControl>>
+  Partial<ComponentProps<typeof WindowControl>> & {
+    /** 最大化前状態をクリアするコールバック */
+    onClearBeforeMaximize?: () => void
+  }
 
 /** 基本情報ウィンドウ */
 export const BasicInfoWindow = ({
@@ -43,7 +48,9 @@ export const BasicInfoWindow = ({
   onMaximize: handleMaximize,
   onFocus,
   onPositionChange,
-  shouldAppear
+  shouldAppear,
+  beforeMaximize,
+  onClearBeforeMaximize
 }: Props) => {
   const [shouldDisplay, setShouldDisplay] = useState(true)
   const [isFullScreen, setIsFullScreen] = useState(false)
@@ -76,9 +83,9 @@ export const BasicInfoWindow = ({
   }
 
   /** 最大化ボタンを押下した時の処理 */
-  const handleMaximizeButtonClick = () => {
+  const handleMaximizeButtonClick = (info?: SizeLocationInfo) => {
     if (handleMaximize !== undefined) {
-      handleMaximize()
+      handleMaximize(info)
       return
     }
     setIsFullScreen(prev => !prev)
@@ -86,11 +93,13 @@ export const BasicInfoWindow = ({
 
   return (
     <WindowContainer
+      beforeMaximize={beforeMaximize}
       bottom={bottom}
       hasWindowControl
       isFixed={false}
       isFullScreen={actualIsFullScreen}
       left={left}
+      onClearBeforeMaximize={onClearBeforeMaximize}
       onClose={handleCloseButtonClick}
       onFocus={onFocus}
       onMaximize={handleMaximizeButtonClick}

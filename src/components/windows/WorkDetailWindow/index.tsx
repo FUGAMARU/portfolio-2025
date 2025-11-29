@@ -9,6 +9,7 @@ import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { Work } from "@/hooks/useDataFetch"
+import type { SizeLocationInfo } from "@/types"
 import type { ComponentProps } from "react"
 
 // 拡張係数: Window高さ増分のうち本文拡張に割り当てる割合
@@ -21,8 +22,11 @@ type Props = Work &
   Pick<ComponentProps<typeof WindowControl>, "onClose" | "onMaximize" | "onMinimize"> &
   Pick<
     ComponentProps<typeof WindowContainer>,
-    "left" | "top" | "onPositionChange" | "zIndex" | "onFocus" | "isFullScreen"
-  >
+    "left" | "top" | "onPositionChange" | "zIndex" | "onFocus" | "isFullScreen" | "beforeMaximize"
+  > & {
+    /** 最大化前状態をクリアするコールバック */
+    onClearBeforeMaximize?: () => void
+  }
 
 /** 作品詳細ウィンドウ */
 export const WorkDetailWindow = ({
@@ -43,14 +47,15 @@ export const WorkDetailWindow = ({
   const windowScale = useWindowScale(rootRef, windowContainerProps.isFullScreen)
   const [dynamicMaxHeight, setDynamicMaxHeight] = useState<number>()
   /** カスタムスクロールバーの状態 */
-  const [scrollbarState, setScrollbarState] = useState<{
-    /** 非表示かどうか */
-    isHidden: boolean
-    /** 高さ */
-    height: number
-    /** Y方向変位 */
-    translateY: number
-  }>({ isHidden: true, height: 0, translateY: 0 })
+  const [scrollbarState, setScrollbarState] = useState<
+    {
+      /** 非表示かどうか */
+      isHidden: boolean
+    } & Pick<SizeLocationInfo, "height"> & {
+        /** Y方向変位 */
+        translateY: number
+      }
+  >({ isHidden: true, height: 0, translateY: 0 })
 
   // WindowContainerの高さ変化に応じて説明文のmax-heightを拡張
   useLayoutEffect(() => {

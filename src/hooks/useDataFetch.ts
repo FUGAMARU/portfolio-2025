@@ -3,6 +3,8 @@ import useSWRImmutable from "swr/immutable"
 
 import { getResourceUrl } from "@/utils"
 
+import type { SizeLocationInfo } from "@/types"
+
 /** 作品 */
 export type Work = {
   /** 作品ID */
@@ -41,23 +43,23 @@ export type PortfolioData = {
     /** バッジ */
     badges: {
       /** 上部バッジ */
-      upper: Array<{
-        /** 画像 */
-        src: string
-        /** 遷移先 */
-        href: string
-        /** 高さ */
-        height: number
-      }>
+      upper: Array<
+        {
+          /** 画像 */
+          src: string
+          /** 遷移先 */
+          href: string
+        } & Pick<SizeLocationInfo, "height">
+      >
       /** 下部バッジ */
-      lower: Array<{
-        /** 画像 */
-        src: string
-        /** 遷移先 */
-        href: string
-        /** 高さ */
-        height: number
-      }>
+      lower: Array<
+        {
+          /** 画像 */
+          src: string
+          /** 遷移先 */
+          href: string
+        } & Pick<SizeLocationInfo, "height">
+      >
     }
   }
   /** Inspired By */
