@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import { WorkLinkButton } from "@/components/parts/button/WorkLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
+import windowContainerStyles from "@/components/parts/window/WindowContainer/index.module.css"
 import styles from "@/components/windows/WorkDetailWindow/index.module.css"
 import { useWindowScale } from "@/hooks/useWindowScale"
 import { getResourceUrl } from "@/utils"
@@ -12,10 +13,12 @@ import type { Work } from "@/hooks/useDataFetch"
 import type { SizeLocationInfo } from "@/types"
 import type { ComponentProps, PointerEvent, WheelEvent } from "react"
 
-// 拡張係数: Window高さ増分のうち本文拡張に割り当てる割合
+/** 拡張係数: Window高さ増分のうち本文拡張に割り当てる割合 */
 const GROW_FACTOR = 0.7
-// 初期表示での説明文最大高さ (rem単位基準値)
+/** 初期表示での説明文最大高 (rem単位基準値) */
 const INITIAL_DESCRIPTION_MAX_REM = 7.25
+/** カスタムスクロールバーのthumb最小高 (内容量が多い場合にthumbが極端に小さくなって操作しづらくなるのを防ぐ) */
+const MIN_THUMB_HEIGHT = 24 // px
 
 /** Props */
 type Props = Work &
@@ -189,7 +192,7 @@ export const WorkDetailWindow = ({
       return
     }
 
-    const windowElement = rootElement.parentElement
+    const windowElement = rootElement.closest(`.${windowContainerStyles.windowContainer}`)
     if (windowElement === null) {
       return
     }
@@ -220,7 +223,7 @@ export const WorkDetailWindow = ({
     resizeObserver.observe(windowElement)
 
     return () => resizeObserver.disconnect()
-  }, [])
+  }, [windowContainerProps.isFullScreen])
 
   // macOSなどではオーバーレイスクロールバーが採用されており、ユーザーのシステム設定やOSの挙動により未操作時は非表示になる。
   // 今回はカスタムスクロールバーを常時表示させたいので、独自のトラック/サムを描写し、サムの位置やサイズを同期させるためにuseEffectでDOM計測とイベント購読を実装している。
@@ -231,7 +234,6 @@ export const WorkDetailWindow = ({
     }
 
     let rafId: number | undefined
-    const MIN_THUMB_HEIGHT = 24
 
     /** スクロール量と内容サイズからthumb状態を再計算 */
     const compute = () => {
@@ -290,34 +292,35 @@ export const WorkDetailWindow = ({
 
       resizeObserver?.disconnect()
     }
-  }, [])
+  }, [windowContainerProps.isFullScreen])
 
-  // 初期thumb計算をレイアウト確定後に一度だけ実行
+  // 最大化/スケール/説明文のmax-height更新でscrollHeightだけ変わるケースがあるため、レイアウト確定後に再計算
   useLayoutEffect(() => {
     const description = descriptionRef.current
     if (description === null) {
       return
     }
 
-    // 初期thumb計算は次フレームで実行し同期的な再レンダーを避ける
-    requestAnimationFrame(() => {
+    const id = requestAnimationFrame(() => {
       const visibleHeight = description.clientHeight
       const totalHeight = description.scrollHeight
+      const scrollTop = description.scrollTop
       if (visibleHeight <= 0 || totalHeight <= 0 || totalHeight <= visibleHeight) {
         setScrollbarState({ isHidden: true, height: 0, translateY: 0 })
         return
       }
 
-      const MIN_THUMB_HEIGHT = 24
-      // 初期計算時もトラック高さを同期
       if (trackRef.current !== null) {
         trackRef.current.style.height = `${visibleHeight}px`
       }
-
       const height = Math.max((visibleHeight / totalHeight) * visibleHeight, MIN_THUMB_HEIGHT)
-      setScrollbarState({ isHidden: false, height, translateY: 0 })
+      const maxTop = Math.max(visibleHeight - height, 0)
+      const progress = scrollTop / Math.max(totalHeight - visibleHeight, 1)
+      const translateY = maxTop * progress
+      setScrollbarState({ isHidden: false, height, translateY })
     })
-  }, [])
+    return () => cancelAnimationFrame(id)
+  }, [windowContainerProps.isFullScreen, windowScale, dynamicMaxHeight])
 
   return (
     <WindowContainer
@@ -370,8 +373,8 @@ export const WorkDetailWindow = ({
                   scrollbarState.isHidden
                     ? undefined
                     : {
-                        height: `${Math.round(scrollbarState.height)}px`,
-                        transform: `translateY(${Math.round(scrollbarState.translateY)}px)`
+                        height: `${scrollbarState.height}px`,
+                        transform: `translateY(${scrollbarState.translateY}px)`
                       }
                 }
               />
