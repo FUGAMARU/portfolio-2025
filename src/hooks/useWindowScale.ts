@@ -8,7 +8,7 @@ import type { RefObject } from "react"
  * WindowContainerの幅を基準にCSSカスタムプロパティ`--window-scale`用のスケール値を計算するフック
  *
  * @param rootRef - Window内コンテンツのルート要素を指す ref
- * @param isMaximizing - trueの場合はviewport横幅を基準にスケール値を計算する
+ * @param isMaximizing - trueの場合はviewport内に収まるようスケール値を計算する
  */
 export const useWindowScale = (rootRef: RefObject<HTMLElement | null>, isMaximizing: boolean) => {
   const [windowScale, setWindowScale] = useState(1)
@@ -52,11 +52,28 @@ export const useWindowScale = (rootRef: RefObject<HTMLElement | null>, isMaximiz
     if (isMaximizing) {
       /** viewportリサイズ時にスケールを再計算する */
       const handleResize = () => {
-        const currentWidth = window.innerWidth
-        const baseWidth = baseWidthRef.current ?? currentWidth
+        const viewportWidth = window.innerWidth
+        const baseWidth = baseWidthRef.current ?? viewportWidth
+
+        const computedStyle = getComputedStyle(windowElement)
+
+        const parsedPaddingLeft = Number.parseFloat(computedStyle.paddingLeft)
+        const parsedPaddingRight = Number.parseFloat(computedStyle.paddingRight)
+        const parsedBorderLeft = Number.parseFloat(computedStyle.borderLeftWidth)
+        const parsedBorderRight = Number.parseFloat(computedStyle.borderRightWidth)
+
+        const paddingLeft = Number.isFinite(parsedPaddingLeft) ? parsedPaddingLeft : 0
+        const paddingRight = Number.isFinite(parsedPaddingRight) ? parsedPaddingRight : 0
+        const borderLeft = Number.isFinite(parsedBorderLeft) ? parsedBorderLeft : 0
+        const borderRight = Number.isFinite(parsedBorderRight) ? parsedBorderRight : 0
+        const availableWidth = Math.max(
+          0,
+          viewportWidth - (paddingLeft + paddingRight + borderLeft + borderRight)
+        )
 
         if (baseWidth > 0) {
-          const nextScale = Math.max(1, currentWidth / baseWidth)
+          // WindowContainerの「実効コンテンツ幅」に収まるようスケールする
+          const nextScale = availableWidth / baseWidth
           setWindowScale(nextScale)
         }
       }
