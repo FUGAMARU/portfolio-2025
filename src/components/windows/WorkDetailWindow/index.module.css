@@ -85,7 +85,7 @@
         z-index: 1;
         width: 0.3125rem;
         height: 100%;
-        pointer-events: none;
+        pointer-events: auto;
         background: var(--color-general-background-alpha);
         border-radius: 20px;
 
@@ -93,11 +93,18 @@
           position: absolute;
           left: 0;
           width: 100%;
+          touch-action: none;
+          cursor: grab;
+          user-select: none;
           background-color: var(--color-use-case-scrollbar-thumb);
           border-radius: 20px;
           transition:
             background-color 120ms ease,
             opacity 120ms ease;
+
+          &:active {
+            cursor: grabbing;
+          }
 
           &.Hidden {
             opacity: 0;

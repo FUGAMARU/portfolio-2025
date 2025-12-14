@@ -10,7 +10,7 @@ import { getResourceUrl } from "@/utils"
 import type { WindowControl } from "@/components/parts/window/WindowControl"
 import type { Work } from "@/hooks/useDataFetch"
 import type { SizeLocationInfo } from "@/types"
-import type { ComponentProps } from "react"
+import type { ComponentProps, PointerEvent, WheelEvent } from "react"
 
 // 拡張係数: Window高さ増分のうち本文拡張に割り当てる割合
 const GROW_FACTOR = 0.7
@@ -56,6 +56,131 @@ export const WorkDetailWindow = ({
         translateY: number
       }
   >({ isHidden: true, height: 0, translateY: 0 })
+
+  /** thumbドラッグ状態 */
+  type DragState =
+    | {
+        /** ドラッグ中かどうか */
+        isDragging: false
+      }
+    | {
+        /** ドラッグ中かどうか */
+        isDragging: true
+        /** `pointerId` (ポインター追跡用) */
+        pointerId: number
+        /** トラック内Y座標の掴み位置オフセット */
+        grabOffsetY: number
+      }
+
+  /** thumbドラッグ状態（React再レンダー不要） */
+  const dragStateRef = useRef<DragState>({ isDragging: false })
+
+  /** thumbのY位置(トラック内)から本文スクロール位置へ変換 */
+  const scrollToThumbTop = (thumbTop: number) => {
+    const description = descriptionRef.current
+    if (description === null) {
+      return
+    }
+
+    const visibleHeight = description.clientHeight
+    const totalHeight = description.scrollHeight
+    const maxScrollTop = Math.max(totalHeight - visibleHeight, 0)
+
+    const maxThumbTop = Math.max(visibleHeight - scrollbarState.height, 0)
+    if (maxThumbTop <= 0) {
+      description.scrollTop = 0
+      return
+    }
+
+    const progress = thumbTop / maxThumbTop
+    description.scrollTop = progress * maxScrollTop
+  }
+
+  /** thumbを掴んだ時の初期化 */
+  const handleThumbPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (scrollbarState.isHidden) {
+      return
+    }
+
+    const trackEl = trackRef.current
+    const thumbEl = thumbRef.current
+    if (trackEl === null || thumbEl === null) {
+      return
+    }
+
+    // 右ドラッグ等は無視（主にマウス向け）
+    if ("button" in event && event.button !== 0) {
+      return
+    }
+
+    const trackRect = trackEl.getBoundingClientRect()
+    const pointerYInTrack = event.clientY - trackRect.top
+    const grabOffsetY = pointerYInTrack - scrollbarState.translateY
+
+    dragStateRef.current = {
+      isDragging: true,
+      pointerId: event.pointerId,
+      grabOffsetY
+    }
+
+    thumbEl.setPointerCapture(event.pointerId)
+    event.preventDefault()
+  }
+
+  /** 掴んだまま移動した分だけスクロールさせる */
+  const handleThumbPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const state = dragStateRef.current
+    if (!state.isDragging) {
+      return
+    }
+    if (state.pointerId !== event.pointerId) {
+      return
+    }
+
+    const description = descriptionRef.current
+    const trackEl = trackRef.current
+    if (description === null || trackEl === null) {
+      return
+    }
+
+    const visibleHeight = description.clientHeight
+    const maxThumbTop = Math.max(visibleHeight - scrollbarState.height, 0)
+    if (maxThumbTop <= 0) {
+      return
+    }
+
+    const trackRect = trackEl.getBoundingClientRect()
+    const pointerYInTrack = event.clientY - trackRect.top
+    const nextThumbTop = Math.min(Math.max(pointerYInTrack - state.grabOffsetY, 0), maxThumbTop)
+    scrollToThumbTop(nextThumbTop)
+    event.preventDefault()
+  }
+
+  /** 掴み終了 */
+  const handleThumbPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    const state = dragStateRef.current
+    if (!state.isDragging) {
+      return
+    }
+    if (state.pointerId !== event.pointerId) {
+      return
+    }
+
+    dragStateRef.current = { isDragging: false }
+    event.preventDefault()
+  }
+
+  /** スクロールバー上のホイール操作を本文へフォワード */
+  const handleScrollbarWheel = (event: WheelEvent<HTMLDivElement>) => {
+    const description = descriptionRef.current
+    if (description === null) {
+      return
+    }
+
+    // スクロールバー上でも本文スクロールを維持
+    description.scrollTop += event.deltaY
+    event.preventDefault()
+  }
 
   // WindowContainerの高さ変化に応じて説明文のmax-heightを拡張
   useLayoutEffect(() => {
@@ -233,10 +358,14 @@ export const WorkDetailWindow = ({
             >
               {description}
             </p>
-            <div ref={trackRef} className={styles.scrollbar}>
+            <div ref={trackRef} className={styles.scrollbar} onWheel={handleScrollbarWheel}>
               <div
                 ref={thumbRef}
                 className={clsx(styles.thumb, { [styles.Hidden]: scrollbarState.isHidden })}
+                onPointerCancel={handleThumbPointerUp}
+                onPointerDown={handleThumbPointerDown}
+                onPointerMove={handleThumbPointerMove}
+                onPointerUp={handleThumbPointerUp}
                 style={
                   scrollbarState.isHidden
                     ? undefined
