@@ -222,6 +222,7 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
 
     case "TOGGLE_FULLSCREEN": {
       const { id, beforeMaximize } = action.payload
+      const maxZIndex = state.length === 0 ? 0 : Math.max(...state.map(w => w.zIndex))
       return state.map(window => {
         if (window.id !== id) {
           return window
@@ -234,7 +235,8 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
           return {
             ...window,
             isFullScreen: true,
-            beforeMaximize
+            beforeMaximize,
+            zIndex: maxZIndex + 1
           }
         }
 
@@ -252,9 +254,11 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
         }
 
         // フォールバック: 単純にトグル
+        const nextIsFullScreen = !isCurrentlyFullScreen
         return {
           ...window,
-          isFullScreen: !isCurrentlyFullScreen
+          isFullScreen: nextIsFullScreen,
+          ...(nextIsFullScreen ? { zIndex: maxZIndex + 1 } : {})
         }
       })
     }

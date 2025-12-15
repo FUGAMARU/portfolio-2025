@@ -8,6 +8,9 @@ import { WindowControl } from "@/components/parts/window/WindowControl"
 import type { SizeLocationInfo } from "@/types"
 import type { ReactNode } from "react"
 
+/** フルスクリーン時はPlayerWindow(z-index:999)より前に出す */
+const FULLSCREEN_MIN_Z_INDEX = 1000
+
 /** 位置指定用Props */
 type PositionProps = {
   /** top */
@@ -77,10 +80,12 @@ export const WindowContainer = ({
   beforeMaximize,
   ...windowControlProps
 }: Props) => {
-  const [isInitialized, setIsInitialized] = useState(false)
-  const [initialSize, setInitialSize] = useState({ width: 0, height: 0 })
-  /** 現在のウィンドウサイズ（beforeMaximize復元やリサイズ時に使用） */
-  const [currentSize, setCurrentSize] = useState<Pick<SizeLocationInfo, "width" | "height">>()
+  const [isInitialized, setIsInitialized] = useState(() => beforeMaximize !== undefined)
+  const [initialSize, setInitialSize] = useState(() =>
+    beforeMaximize !== undefined
+      ? { width: beforeMaximize.width, height: beforeMaximize.height }
+      : { width: 0, height: 0 }
+  )
   const rndRef = useRef<Rnd>(null)
   const windowContentRef = useRef<HTMLDivElement>(null)
 
@@ -165,15 +170,11 @@ export const WindowContainer = ({
     document.fonts.ready.then(measureAndSetInitialPosition)
   }, [isInitialized, top, left, right, bottom])
 
-  // beforeMaximizeによるサイズと位置の復元（最大化解除時のみ）
+  // beforeMaximizeのクリア（最大化解除時のみ）
   useEffect(() => {
-    if (!isInitialized || isFullScreen || beforeMaximize === undefined || rndRef.current === null) {
+    if (isFullScreen || beforeMaximize === undefined) {
       return
     }
-
-    rndRef.current.updatePosition({ x: beforeMaximize.x, y: beforeMaximize.y })
-    // beforeMaximizeの値を使ってサイズを復元（derived stateだが、復元時のみ必要）
-    setCurrentSize({ width: beforeMaximize.width, height: beforeMaximize.height })
 
     // 復元完了後にbeforeMaximizeをクリア
     const onClearBeforeMaximize =
@@ -220,7 +221,12 @@ export const WindowContainer = ({
           styles.FullScreen,
           shouldAppear ? styles.AppearShown : styles.AppearHidden
         )}
-        style={{ pointerEvents: shouldAppear ? "auto" : "none" }}
+        onClick={onFocus}
+        onMouseDown={onFocus}
+        style={{
+          zIndex: Math.max(zIndex ?? 0, FULLSCREEN_MIN_Z_INDEX),
+          pointerEvents: shouldAppear ? "auto" : "none"
+        }}
       >
         {windowControlProps.hasWindowControl === true && (
           <div className={styles.control}>
@@ -240,10 +246,10 @@ export const WindowContainer = ({
     <Rnd
       ref={rndRef}
       default={{
-        height: "auto",
-        width: "auto",
-        x: 0,
-        y: 0
+        height: beforeMaximize?.height ?? "auto",
+        width: beforeMaximize?.width ?? "auto",
+        x: beforeMaximize?.x ?? 0,
+        y: beforeMaximize?.y ?? 0
       }}
       disableDragging={!isInitialized || isFixed}
       enableResizing={!isFixed}
@@ -252,14 +258,6 @@ export const WindowContainer = ({
       onDrag={(_, data) => {
         handlePositionChange?.({ x: data.x, y: data.y })
       }}
-      onResize={(_, __, ref) => {
-        // リサイズ時に現在のサイズを保存
-        setCurrentSize({
-          width: ref.offsetWidth,
-          height: ref.offsetHeight
-        })
-      }}
-      size={currentSize}
       style={{
         visibility: isInitialized ? "visible" : "hidden",
         zIndex: zIndex ?? "auto",
