@@ -24,7 +24,7 @@ const BOUNDARY_CHECK = {
 type Coordinates = Pick<SizeLocationInfo, "x" | "y">
 
 /** ウィンドウ状態 */
-export type WindowState = {
+type WindowState = {
   /** ウィンドウID */
   id: string
   /** ウィンドウタイプ */
