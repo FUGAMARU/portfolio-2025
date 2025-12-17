@@ -103,32 +103,6 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const rafScheduledRef = useRef<boolean>(false)
   const isDev = import.meta.env.DEV
 
-  // プロフィール情報
-  const { data: profile } = useSWRImmutable<Profile>(
-    shouldFetch ? "/profile" : null,
-    async (key: string) => {
-      const url = new URL(getResourceUrl(key))
-      url.searchParams.set("origin", window.location.origin)
-      const res = await fetch(url.toString(), { cache: "no-store" })
-      if (!res.ok) {
-        throw new Error("APIフェッチに失敗しました")
-      }
-      return res.json() as Promise<Profile>
-    }
-  )
-
-  // 基本情報
-  const { data: basicInfo } = useSWRImmutable<BasicInfo>(
-    shouldFetch ? "/" : null,
-    async (key: string) => {
-      const res = await fetch(getResourceUrl(key), { cache: "no-store" })
-      if (!res.ok) {
-        throw new Error("APIフェッチに失敗しました")
-      }
-      return res.json() as Promise<BasicInfo>
-    }
-  )
-
   // RTT補正済みのサーバ時刻
   const { data: currentServerTime } = useSWRImmutable<string>(
     shouldFetch ? "/time/corrected" : null,
@@ -154,6 +128,32 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
       const m2 = await measure(r2, m2Start)
       const best = m1.rtt <= m2.rtt ? m1 : m2
       return new Date(best.correctedCurrentMs).toISOString()
+    }
+  )
+
+  // プロフィール情報
+  const { data: profile } = useSWRImmutable<Profile>(
+    shouldFetch ? "/profile" : null,
+    async (key: string) => {
+      const url = new URL(getResourceUrl(key))
+      url.searchParams.set("origin", window.location.origin)
+      const res = await fetch(url.toString(), { cache: "no-store" })
+      if (!res.ok) {
+        throw new Error("APIフェッチに失敗しました")
+      }
+      return res.json() as Promise<Profile>
+    }
+  )
+
+  // 基本情報
+  const { data: basicInfo } = useSWRImmutable<BasicInfo>(
+    shouldFetch ? "/" : null,
+    async (key: string) => {
+      const res = await fetch(getResourceUrl(key), { cache: "no-store" })
+      if (!res.ok) {
+        throw new Error("APIフェッチに失敗しました")
+      }
+      return res.json() as Promise<BasicInfo>
     }
   )
 
