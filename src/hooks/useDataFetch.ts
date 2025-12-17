@@ -107,7 +107,9 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const { data: profile } = useSWRImmutable<Profile>(
     shouldFetch ? "/profile" : null,
     async (key: string) => {
-      const res = await fetch(getResourceUrl(key), { cache: "no-store" })
+      const url = new URL(getResourceUrl(key))
+      url.searchParams.set("origin", window.location.origin)
+      const res = await fetch(url.toString(), { cache: "no-store" })
       if (!res.ok) {
         throw new Error("APIフェッチに失敗しました")
       }
