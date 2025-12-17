@@ -98,7 +98,6 @@ export type BasicInfo = {
  */
 export const useDataFetch = (shouldFetch: boolean = true) => {
   const [loadedMediaAssets, setLoadedMediaAssets] = useState<number>(0)
-  const createdObjectUrlListRef = useRef<Array<string>>([])
   const progressRef = useRef<number>(0)
   const rafScheduledRef = useRef<boolean>(false)
   const isDev = import.meta.env.DEV
@@ -204,7 +203,6 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
         const res = await fetch(getResourceUrl(url))
         const blob = await res.blob()
         objectUrlOrOriginal = URL.createObjectURL(blob)
-        createdObjectUrlListRef.current.push(objectUrlOrOriginal)
         if (isDev) {
           const parts = url.split("/")
           const fileName = parts.length > 0 ? parts[parts.length - 1] : url
@@ -261,17 +259,13 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     [convertToObjectUrl, isDev]
   )
 
-  // 進捗とObjectURL管理の初期化
+  // 進捗の初期化
   useEffect(() => {
     if (!(profile !== undefined || basicInfo !== undefined)) {
       return
     }
 
-    // データフェッチが始まったら前回生成分を破棄して進捗をリセット
-    if (createdObjectUrlListRef.current.length > 0) {
-      createdObjectUrlListRef.current.forEach(url => URL.revokeObjectURL(url))
-      createdObjectUrlListRef.current = []
-    }
+    // データフェッチが始まったら進捗をリセット
     progressRef.current = 0
     setLoadedMediaAssets(0)
   }, [profile, basicInfo])
@@ -332,20 +326,6 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     basicInfo === undefined ? null : ["processedPortfolio", basicInfo],
     preloadPortfolioMedia
   )
-
-  // アンマウント時・依存除去時にObjectURLを解放
-  useEffect(() => {
-    return () => {
-      if (createdObjectUrlListRef.current.length < 1) {
-        return
-      }
-
-      createdObjectUrlListRef.current.forEach(url => URL.revokeObjectURL(url))
-      if (isDev) {
-        console.log(`🧹 ObjectURLを解放：${createdObjectUrlListRef.current.length}件`)
-      }
-    }
-  }, [isDev])
 
   return { profileData, portfolioData, currentServerTime, mediaDownloadStatus } as const
 }
