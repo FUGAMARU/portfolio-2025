@@ -28,10 +28,10 @@ type WindowState = {
   /** ウィンドウID */
   id: string
   /** ウィンドウタイプ */
-  type: "basic-info" | "work-detail" | "inspired-by"
+  type: "profile" | "work-detail" | "inspired-by"
   /** 現在のX位置（ドラッグ移動後） */
   currentX: number
-  /** 現在のY位置（ドラッグ移動後） - BasicInfoWindowのみoptional */
+  /** 現在のY位置（ドラッグ移動後） - ProfileWindowのみoptional */
   currentY: number | undefined
   /** z-index */
   zIndex: number
@@ -53,7 +53,7 @@ type WindowAction =
         /** ウィンドウID */
         id: string
         /** ウィンドウタイプ */
-        windowType: "basic-info" | "work-detail" | "inspired-by"
+        windowType: "profile" | "work-detail" | "inspired-by"
         /** 初期位置 */
         initialPosition?: Coordinates
       }
@@ -125,14 +125,14 @@ type WindowAction =
  */
 const getNewWindowPosition = (
   state: Array<WindowState>,
-  windowType: "basic-info" | "work-detail" | "inspired-by",
+  windowType: "profile" | "work-detail" | "inspired-by",
   initialPosition?: Coordinates
 ): Coordinates => {
   if (initialPosition !== undefined) {
     return initialPosition
   }
 
-  if (windowType === "basic-info") {
+  if (windowType === "profile") {
     return { x: WINDOW_POSITION.INITIAL_LEFT, y: WINDOW_POSITION.INITIAL_TOP }
   }
 
@@ -189,7 +189,7 @@ const windowReducer = (state: Array<WindowState>, action: WindowAction): Array<W
         id,
         type: windowType,
         currentX: newLeft,
-        currentY: windowType === "basic-info" ? undefined : newTop,
+        currentY: windowType === "profile" ? undefined : newTop,
         zIndex: maxZIndex + 1,
         isVisible: true,
         isFullScreen: false
@@ -328,8 +328,8 @@ export const useWindowManager = (initialState: Array<WindowState> = []) => {
     }, [])
   }
 
-  // BasicInfoWindowの状態
-  const basicInfoWindow = windowManagerState.find(window => window.id === "basic-info")
+  // ProfileWindowの状態
+  const profileWindow = windowManagerState.find(window => window.id === "profile")
 
   /** 表示中のWorkDetailWindowsを取得 */
   const getVisibleWorkDetailWindows = useCallback(
@@ -354,7 +354,7 @@ export const useWindowManager = (initialState: Array<WindowState> = []) => {
 
   return {
     windowManagerState,
-    basicInfoWindow,
+    profileWindow,
     handleWorkButtonClick,
     handleInspiredByWidgetClick,
     windowActions,

@@ -1,7 +1,7 @@
 import { atom } from "jotai"
 import { Vibrant } from "node-vibrant/browser"
 
-import type { PortfolioData } from "@/hooks/useDataFetch"
+import type { BasicInfo } from "@/hooks/useDataFetch"
 
 /** YouTubeプレイヤーの状態 */
 export const YouTubePlayerState = {
@@ -14,13 +14,13 @@ export const YouTubePlayerState = {
 } as const
 
 /** プレイリスト （シャッフル済み） */
-export const playlistAtom = atom<PortfolioData["bgm"]>([])
+export const playlistAtom = atom<BasicInfo["bgm"]>([])
 
 /** 現在のトラック位置 */
 export const audioTrackIndexAtom = atom<number>(0)
 
 /** 現在のトラック */
-export const currentTrackAtom = atom<PortfolioData["bgm"][number] | undefined>(get => {
+export const currentTrackAtom = atom<BasicInfo["bgm"][number] | undefined>(get => {
   const list = get(playlistAtom)
   const index = get(audioTrackIndexAtom)
   return list[index]

@@ -21,7 +21,8 @@ const POST_LOAD_DELAY_MS = 1000
 /** App */
 export const App = () => {
   const [isWarn, setIsWarn] = useState(false)
-  const { portfolioData, currentServerTime, mediaDownloadStatus } = useDataFetch(!isWarn)
+  const { profileData, portfolioData, currentServerTime, mediaDownloadStatus } =
+    useDataFetch(!isWarn)
   const {
     handleReady,
     handlePlayButtonClick,
@@ -70,11 +71,12 @@ export const App = () => {
       }, [didAutoplayRemount, handlePlayButtonClick]) as () => void,
       progressPercent,
       isPlaying,
-      canFadeOutWelcome: portfolioData !== undefined
+      canFadeOutWelcome: portfolioData !== undefined && profileData !== undefined
     }
   )
 
-  const shouldShowWelcomeView = showWelcome || portfolioData === undefined
+  const shouldShowWelcomeView =
+    showWelcome || portfolioData === undefined || profileData === undefined
   // WelcomeView完全終了後のみMainを出現させる
   const shouldStartAppear = !shouldShowWelcomeView
 
@@ -121,6 +123,7 @@ export const App = () => {
           currentServerTime={currentServerTime}
           isMuted={isMuted}
           portfolioData={portfolioData}
+          profileData={profileData}
           shouldRenderWindows={shouldStartAppear}
         />
       </div>

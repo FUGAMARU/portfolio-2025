@@ -5,18 +5,20 @@ import { InspiredBy } from "@/components/widgets/InspiredByWidget"
 import { LoadingStatusWidget } from "@/components/widgets/LoadingStatusWidget"
 import { StarWidget } from "@/components/widgets/StarWidget"
 import { WorksWidget } from "@/components/widgets/WorksWidget"
-import { BasicInfoWindow } from "@/components/windows/BasicInfoWindow"
 import { InspiredByWindow } from "@/components/windows/InspiredByWindow"
 import { PlayerWindow } from "@/components/windows/PlayerWindow"
+import { ProfileWindow } from "@/components/windows/ProfileWindow"
 import { WorkDetailWindow } from "@/components/windows/WorkDetailWindow"
 import { useWindowManager, WINDOW_POSITION } from "@/hooks/useWindowManager"
 
-import type { PortfolioData } from "@/hooks/useDataFetch"
+import type { BasicInfo, Profile } from "@/hooks/useDataFetch"
 
 /** Props */
 type Props = {
+  /** プロフィールデータ */
+  profileData?: Profile
   /** ポートフォリオのデータ */
-  portfolioData?: PortfolioData
+  portfolioData?: BasicInfo
   /** Welcome表示中はウィンドウを描画しない */
   shouldRenderWindows?: boolean
   /** サーバの現在時刻(ISO) */
@@ -27,23 +29,24 @@ type Props = {
 
 /** メインビュー */
 export const MainView = ({
+  profileData,
   portfolioData,
   shouldRenderWindows = true,
   currentServerTime,
   isMuted = false
 }: Props) => {
   const {
-    basicInfoWindow,
+    profileWindow,
     handleWorkButtonClick,
     handleInspiredByWidgetClick,
     windowActions,
     getVisibleWorkDetailWindows,
     windowManagerState
   } = useWindowManager([
-    // BasicInfoWindowを初期状態で開いておく
+    // ProfileWindowを初期状態で開いておく
     {
-      id: "basic-info",
-      type: "basic-info",
+      id: "profile",
+      type: "profile",
       currentX: 48,
       currentY: undefined, // bottomで位置指定するためundefinedにする
       zIndex: 1,
@@ -54,7 +57,7 @@ export const MainView = ({
 
   const visibleWorkDetailWindows = getVisibleWorkDetailWindows(portfolioData?.works ?? [])
 
-  if (portfolioData === undefined) {
+  if (portfolioData === undefined || profileData === undefined) {
     return null
   }
 
@@ -75,22 +78,22 @@ export const MainView = ({
         <StarWidget currentServerTime={currentServerTime} />
       </div>
 
-      {basicInfoWindow !== undefined && basicInfoWindow.isVisible && (
-        <BasicInfoWindow
-          basicInfo={portfolioData.basicInfo}
-          beforeMaximize={basicInfoWindow.beforeMaximize}
-          bottom={basicInfoWindow.currentY === undefined ? 48 : undefined}
-          isFullScreen={basicInfoWindow.isFullScreen ?? false}
-          left={basicInfoWindow.currentX}
-          onClearBeforeMaximize={() => windowActions.clearBeforeMaximize("basic-info")}
-          onClose={() => windowActions.close("basic-info")}
-          onFocus={() => windowActions.focus("basic-info")}
-          onMaximize={info => windowActions.maximize("basic-info", info)}
-          onMinimize={() => windowActions.minimize("basic-info")}
-          onPositionChange={position => windowActions.updatePosition("basic-info", position)}
+      {profileWindow !== undefined && profileWindow.isVisible && (
+        <ProfileWindow
+          beforeMaximize={profileWindow.beforeMaximize}
+          bottom={profileWindow.currentY === undefined ? 48 : undefined}
+          isFullScreen={profileWindow.isFullScreen ?? false}
+          left={profileWindow.currentX}
+          onClearBeforeMaximize={() => windowActions.clearBeforeMaximize("profile")}
+          onClose={() => windowActions.close("profile")}
+          onFocus={() => windowActions.focus("profile")}
+          onMaximize={info => windowActions.maximize("profile", info)}
+          onMinimize={() => windowActions.minimize("profile")}
+          onPositionChange={position => windowActions.updatePosition("profile", position)}
+          profile={profileData}
           shouldAppear={shouldRenderWindows}
-          top={basicInfoWindow.currentY}
-          zIndex={basicInfoWindow.zIndex}
+          top={profileWindow.currentY}
+          zIndex={profileWindow.zIndex}
         />
       )}
 

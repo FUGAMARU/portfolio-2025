@@ -3,21 +3,21 @@ import { useRef, useState } from "react"
 
 import { BadgeLinkButton } from "@/components/parts/button/BadgeLinkButton"
 import { WindowContainer } from "@/components/parts/window/WindowContainer"
-import { CakeIcon } from "@/components/windows/BasicInfoWindow/CakeIcon"
-import styles from "@/components/windows/BasicInfoWindow/index.module.css"
-import { WrenchIcon } from "@/components/windows/BasicInfoWindow/WrenchIcon"
+import { CakeIcon } from "@/components/windows/ProfileWindow/CakeIcon"
+import styles from "@/components/windows/ProfileWindow/index.module.css"
+import { WrenchIcon } from "@/components/windows/ProfileWindow/WrenchIcon"
 import { useWindowScale } from "@/hooks/useWindowScale"
 import { getResourceUrl } from "@/utils"
 
 import type { WindowControl } from "@/components/parts/window/WindowControl"
-import type { PortfolioData } from "@/hooks/useDataFetch"
+import type { Profile } from "@/hooks/useDataFetch"
 import type { SizeLocationInfo } from "@/types"
 import type { ComponentProps } from "react"
 
 /** Props */
 type Props = {
-  /** 基本情報 */
-  basicInfo: PortfolioData["basicInfo"]
+  /** プロフィール */
+  profile: Profile
 } & Pick<
   ComponentProps<typeof WindowContainer>,
   | "left"
@@ -35,9 +35,9 @@ type Props = {
     onClearBeforeMaximize?: () => void
   }
 
-/** 基本情報ウィンドウ */
-export const BasicInfoWindow = ({
-  basicInfo,
+/** プロフィールウィンドウ */
+export const ProfileWindow = ({
+  profile,
   left,
   bottom,
   top,
@@ -111,30 +111,30 @@ export const BasicInfoWindow = ({
     >
       <div
         ref={containerRef}
-        className={styles.basicInfoWindow}
+        className={styles.profileWindow}
         style={{ ["--window-scale" as string]: windowScale }}
       >
-        <h1 className={styles.name}>{basicInfo.name}</h1>
+        <h1 className={styles.name}>{profile.name}</h1>
 
         <div className={styles.info}>
           <div className={styles.row}>
             <span className={styles.icon}>
               <WrenchIcon />
             </span>
-            <span className={styles.label}>{basicInfo.title}</span>
+            <span className={styles.label}>{profile.title}</span>
           </div>
 
           <div className={styles.row}>
             <span className={styles.icon}>
               <CakeIcon />
             </span>
-            <span className={clsx(styles.label, styles.Numeric)}>{basicInfo.birthday}</span>
+            <span className={clsx(styles.label, styles.Numeric)}>{profile.birthday}</span>
           </div>
         </div>
 
         <div className={styles.badges}>
           <div className={styles.row}>
-            {basicInfo.badges.upper.map(badge => (
+            {profile.badges.upper.map(badge => (
               <BadgeLinkButton
                 key={badge.src}
                 height={badge.height}
@@ -144,7 +144,7 @@ export const BasicInfoWindow = ({
             ))}
           </div>
           <div className={styles.row}>
-            {basicInfo.badges.lower.map(badge => (
+            {profile.badges.lower.map(badge => (
               <BadgeLinkButton
                 key={badge.src}
                 height={badge.height}

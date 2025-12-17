@@ -8,14 +8,14 @@ import { useAudioPlaylist } from "@/hooks/useAudio/useAudioPlaylist"
 import { useAudioProgress } from "@/hooks/useAudio/useAudioProgress"
 import { useAudioTrackNavigation } from "@/hooks/useAudio/useAudioTrackNavigation"
 
-import type { PortfolioData } from "@/hooks/useDataFetch"
+import type { BasicInfo } from "@/hooks/useDataFetch"
 import type { YouTubeEvent, YouTubePlayer } from "react-youtube"
 
 /**
  * オーディオ再生用カスタムフック
  * App.tsxからPlayerWindowまでAtomを使わずにPropsでデーターを伝搬するとMainViewを経由することになるが、MainViewは要素が多くレンダリングコストが高めなのでAtomを使うことによってMainViewを経由せずにPlayerWindowに直接データーを伝搬している。
  */
-export const useAudio = (bgm: PortfolioData["bgm"]) => {
+export const useAudio = (bgm: BasicInfo["bgm"]) => {
   // プレイヤー参照を親で一元管理
   const playerRef = useRef<YouTubePlayer | null>(null)
 

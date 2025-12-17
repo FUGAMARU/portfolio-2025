@@ -5,6 +5,37 @@ import { getResourceUrl } from "@/utils"
 
 import type { SizeLocationInfo } from "@/types"
 
+/** プロフィール */
+export type Profile = {
+  /** 名前 */
+  name: string
+  /** 肩書き */
+  title: string
+  /** 生年月日 */
+  birthday: string
+  /** バッジ */
+  badges: {
+    /** 上部バッジ */
+    upper: Array<
+      {
+        /** 画像 */
+        src: string
+        /** 遷移先 */
+        href: string
+      } & Pick<SizeLocationInfo, "height">
+    >
+    /** 下部バッジ */
+    lower: Array<
+      {
+        /** 画像 */
+        src: string
+        /** 遷移先 */
+        href: string
+      } & Pick<SizeLocationInfo, "height">
+    >
+  }
+}
+
 /** 作品 */
 export type Work = {
   /** 作品ID */
@@ -30,38 +61,8 @@ export type Work = {
   }>
 }
 
-/** APIレスポンスデータの型定義（ポートフォリオの全体データ） */
-export type PortfolioData = {
-  /** 基本情報 */
-  basicInfo: {
-    /** 名前 */
-    name: string
-    /** 肩書き */
-    title: string
-    /** 生年月日 */
-    birthday: string
-    /** バッジ */
-    badges: {
-      /** 上部バッジ */
-      upper: Array<
-        {
-          /** 画像 */
-          src: string
-          /** 遷移先 */
-          href: string
-        } & Pick<SizeLocationInfo, "height">
-      >
-      /** 下部バッジ */
-      lower: Array<
-        {
-          /** 画像 */
-          src: string
-          /** 遷移先 */
-          href: string
-        } & Pick<SizeLocationInfo, "height">
-      >
-    }
-  }
+/** 基本情報 */
+export type BasicInfo = {
   /** Inspired By */
   inspiredBy: Array<{
     /** ID */
@@ -102,15 +103,27 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const rafScheduledRef = useRef<boolean>(false)
   const isDev = import.meta.env.DEV
 
-  // ベースデータ
-  const { data: baseData } = useSWRImmutable<PortfolioData>(
+  // プロフィール情報
+  const { data: profile } = useSWRImmutable<Profile>(
+    shouldFetch ? "/profile" : null,
+    async (key: string) => {
+      const res = await fetch(getResourceUrl(key), { cache: "no-store" })
+      if (!res.ok) {
+        throw new Error("APIフェッチに失敗しました")
+      }
+      return res.json() as Promise<Profile>
+    }
+  )
+
+  // 基本情報
+  const { data: basicInfo } = useSWRImmutable<BasicInfo>(
     shouldFetch ? "/" : null,
     async (key: string) => {
       const res = await fetch(getResourceUrl(key), { cache: "no-store" })
       if (!res.ok) {
         throw new Error("APIフェッチに失敗しました")
       }
-      return res.json() as Promise<PortfolioData>
+      return res.json() as Promise<BasicInfo>
     }
   )
 
@@ -143,11 +156,14 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   )
 
   const totalMediaAssets = useMemo(() => {
-    if (baseData === undefined) {
+    if (basicInfo === undefined || profile === undefined) {
       return 0
     }
-    return baseData.works.length * 2 + baseData.inspiredBy.length + baseData.bgm.length
-  }, [baseData])
+    const badgesCount = profile.badges.upper.length + profile.badges.lower.length
+    return (
+      basicInfo.works.length * 2 + basicInfo.inspiredBy.length + basicInfo.bgm.length + badgesCount
+    )
+  }, [basicInfo, profile])
 
   const mediaDownloadStatus = useMemo(
     () => ({
@@ -204,23 +220,67 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     [isDev, markMediaFetchCompleted]
   )
 
-  /** 加工済みポートフォリオデータを生成するSWR二段目Fetcher */
-  const preloadPortfolioMedia = useCallback(
-    async (_key: [string, PortfolioData]): Promise<PortfolioData> => {
+  /** 加工済みプロフィールデータを生成するSWR二段目Fetcher */
+  const preloadProfileMedia = useCallback(
+    async (_key: [string, Profile]): Promise<Profile> => {
       const raw = _key[1]
 
-      // 前回生成分を破棄
-      if (createdObjectUrlListRef.current.length > 0) {
-        createdObjectUrlListRef.current.forEach(url => URL.revokeObjectURL(url))
-        createdObjectUrlListRef.current = []
+      if (isDev) {
+        console.log(`🖼️  プロフィール画像プリロード開始`)
       }
 
-      // 進捗初期化
-      progressRef.current = 0
-      setLoadedMediaAssets(0)
-      const total = raw.works.length * 2 + raw.inspiredBy.length + raw.bgm.length
+      // バッジ画像をObjectURLに変換
+      const upperBadgesWithObjectUrls = await Promise.all(
+        raw.badges.upper.map(async badge => ({
+          ...badge,
+          src: await convertToObjectUrl(badge.src)
+        }))
+      )
+
+      const lowerBadgesWithObjectUrls = await Promise.all(
+        raw.badges.lower.map(async badge => ({
+          ...badge,
+          src: await convertToObjectUrl(badge.src)
+        }))
+      )
+
       if (isDev) {
-        console.log(`🖼️  画像プリロード開始（合計${total}件）`)
+        console.log(`✅ プロフィール画像プリロード完了`)
+      }
+
+      return {
+        ...raw,
+        badges: {
+          upper: upperBadgesWithObjectUrls,
+          lower: lowerBadgesWithObjectUrls
+        }
+      }
+    },
+    [convertToObjectUrl, isDev]
+  )
+
+  // 進捗とObjectURL管理の初期化
+  useEffect(() => {
+    if (!(profile !== undefined || basicInfo !== undefined)) {
+      return
+    }
+
+    // データフェッチが始まったら前回生成分を破棄して進捗をリセット
+    if (createdObjectUrlListRef.current.length > 0) {
+      createdObjectUrlListRef.current.forEach(url => URL.revokeObjectURL(url))
+      createdObjectUrlListRef.current = []
+    }
+    progressRef.current = 0
+    setLoadedMediaAssets(0)
+  }, [profile, basicInfo])
+
+  /** 加工済みポートフォリオデータを生成するSWR二段目Fetcher */
+  const preloadPortfolioMedia = useCallback(
+    async (_key: [string, BasicInfo]): Promise<BasicInfo> => {
+      const raw = _key[1]
+
+      if (isDev) {
+        console.log(`🖼️  基本情報画像プリロード開始`)
       }
 
       const worksWithObjectUrls = await Promise.all(
@@ -245,23 +305,29 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
         }))
       )
 
-      const processed: PortfolioData = {
+      const processed: BasicInfo = {
         ...raw,
         works: worksWithObjectUrls,
         inspiredBy: inspiredByWithObjectUrls,
         bgm: bgmWithObjectUrls
       }
       if (isDev) {
-        console.log(`✅ 画像プリロード完了（合計${total}件／ObjectURL生成済み）`)
+        console.log(`✅ 基本情報画像プリロード完了`)
       }
       return processed
     },
     [convertToObjectUrl, isDev]
   )
 
-  // 二段目SWR: baseDataが取得済みなら加工版を生成
-  const { data: portfolioData } = useSWRImmutable<PortfolioData>(
-    baseData === undefined ? null : ["processedPortfolio", baseData],
+  // 二段目SWR: profileが取得済みなら加工版を生成
+  const { data: profileData } = useSWRImmutable<Profile>(
+    profile === undefined ? null : ["processedProfile", profile],
+    preloadProfileMedia
+  )
+
+  // 二段目SWR: basicInfoが取得済みなら加工版を生成
+  const { data: portfolioData } = useSWRImmutable<BasicInfo>(
+    basicInfo === undefined ? null : ["processedPortfolio", basicInfo],
     preloadPortfolioMedia
   )
 
@@ -279,5 +345,5 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     }
   }, [isDev])
 
-  return { portfolioData, currentServerTime, mediaDownloadStatus } as const
+  return { profileData, portfolioData, currentServerTime, mediaDownloadStatus } as const
 }
