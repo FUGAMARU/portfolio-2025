@@ -100,7 +100,6 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const [loadedMediaAssets, setLoadedMediaAssets] = useState<number>(0)
   const progressRef = useRef<number>(0)
   const rafScheduledRef = useRef<boolean>(false)
-  const isDev = import.meta.env.DEV
 
   // RTT補正済みのサーバ時刻
   const { data: currentServerTime } = useSWRImmutable<string>(
@@ -209,11 +208,9 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
           throw new Error("Empty blob received")
         }
         objectUrlOrOriginal = URL.createObjectURL(blob)
-        if (isDev) {
-          const parts = url.split("/")
-          const fileName = parts.length > 0 ? parts[parts.length - 1] : url
-          console.log(`  ✓ ${fileName} → ${objectUrlOrOriginal}`)
-        }
+        const parts = url.split("/")
+        const fileName = parts.length > 0 ? parts[parts.length - 1] : url
+        console.log(`  ✓ ${fileName} → ${objectUrlOrOriginal}`)
       } catch (error) {
         console.error(`✗ Failed to load: ${url.split("/").pop()}`, error)
       } finally {
@@ -221,7 +218,7 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
       }
       return objectUrlOrOriginal
     },
-    [isDev, markMediaFetchCompleted]
+    [markMediaFetchCompleted]
   )
 
   /** 加工済みプロフィールデータを生成するSWR二段目Fetcher */
@@ -229,9 +226,7 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     async (_key: [string, Profile]): Promise<Profile> => {
       const raw = _key[1]
 
-      if (isDev) {
-        console.log(`🖼️  プロフィール画像プリロード開始`)
-      }
+      console.log(`🖼️  プロフィール画像プリロード開始`)
 
       // バッジ画像をObjectURLに変換
       const upperBadgesWithObjectUrls = await Promise.all(
@@ -248,9 +243,7 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
         }))
       )
 
-      if (isDev) {
-        console.log(`✅ プロフィール画像プリロード完了`)
-      }
+      console.log(`✅ プロフィール画像プリロード完了`)
 
       return {
         ...raw,
@@ -260,7 +253,7 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
         }
       }
     },
-    [convertToObjectUrl, isDev]
+    [convertToObjectUrl]
   )
 
   // 進捗の初期化
@@ -279,9 +272,7 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     async (_key: [string, BasicInfo]): Promise<BasicInfo> => {
       const raw = _key[1]
 
-      if (isDev) {
-        console.log(`🖼️  基本情報画像プリロード開始`)
-      }
+      console.log(`🖼️  基本情報画像プリロード開始`)
 
       const worksWithObjectUrls = await Promise.all(
         raw.works.map(async work => ({
@@ -311,12 +302,10 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
         inspiredBy: inspiredByWithObjectUrls,
         bgm: bgmWithObjectUrls
       }
-      if (isDev) {
-        console.log(`✅ 基本情報画像プリロード完了`)
-      }
+      console.log(`✅ 基本情報画像プリロード完了`)
       return processed
     },
-    [convertToObjectUrl, isDev]
+    [convertToObjectUrl]
   )
 
   // 二段目SWR: profileが取得済みなら加工版を生成
