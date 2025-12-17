@@ -200,8 +200,14 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     async (url: string): Promise<string> => {
       let objectUrlOrOriginal = url
       try {
-        const res = await fetch(getResourceUrl(url))
+        const res = await fetch(getResourceUrl(url), { cache: "no-store" })
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
         const blob = await res.blob()
+        if (blob.size === 0) {
+          throw new Error("Empty blob received")
+        }
         objectUrlOrOriginal = URL.createObjectURL(blob)
         if (isDev) {
           const parts = url.split("/")
@@ -209,9 +215,7 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
           console.log(`  ✓ ${fileName} → ${objectUrlOrOriginal}`)
         }
       } catch (error) {
-        if (isDev) {
-          console.error(`  ✗ ${url.split("/").pop()}`, error)
-        }
+        console.error(`✗ Failed to load: ${url.split("/").pop()}`, error)
       } finally {
         markMediaFetchCompleted()
       }
