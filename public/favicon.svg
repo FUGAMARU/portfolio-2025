@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32"><svg width="32" height="32" viewBox="0 0 32 32" version="1.1" id="SvgjsSvg1114" xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+  <defs id="SvgjsDefs1113">
+    <linearGradient id="SvgjsLinearGradient1112">
+      <stop style="stop-color:#1e2a38;stop-opacity:1;" offset="0" id="SvgjsStop1111"></stop>
+      <stop style="stop-color:#1e2a38;stop-opacity:0.75;" offset="1" id="SvgjsStop1110"></stop>
+    </linearGradient>
+    <linearGradient xlink:href="#linearGradient4" id="SvgjsLinearGradient1109" x1="4.6862917" y1="4.6862917" x2="27.313709" y2="27.313709" gradientUnits="userSpaceOnUse"></linearGradient>
+  </defs>
+  <g id="SvgjsG1108">
+    <circle style="fill:url(#linearGradient5);fill-opacity:1;stroke:none;stroke-width:481.542;stroke-dasharray:none;stroke-opacity:1" id="SvgjsCircle1107" cx="16" cy="16" r="16"></circle>
+    <path d="m 14.958823,23.938965 c 0.694111,1.583516 1.041176,3.275426 1.041176,5.075735 0,-1.800308 0.336207,-3.492219 1.008639,-5.075735 0.694112,-1.583517 1.626837,-2.960844 2.79816,-4.132167 1.171323,-1.171322 2.548651,-2.093192 4.132167,-2.765622 C 25.522481,16.347066 27.214391,16 29.0147,16 27.214392,16 25.522481,15.663794 23.938965,14.991361 22.397839,14.326869 20.995915,13.377537 19.806798,12.1932 18.622442,11.004085 17.673131,9.602178 17.008638,8.0610328 16.336206,6.4775716 15.999999,4.7856662 15.999999,2.9853001 c 0,1.8003662 -0.347065,3.4922715 -1.041176,5.0757327 -0.672431,1.5834622 -1.594301,2.9608452 -2.765625,4.1321652 -1.189113,1.184339 -2.59102,2.133669 -4.1321653,2.798161 -1.5834612,0.672434 -3.2753667,1.00864 -5.0757326,1.00864 1.800366,0 3.4922715,0.347065 5.0757326,1.041177 1.5834623,0.67243 2.9608453,1.594299 4.1321653,2.765622 1.171324,1.171323 2.093194,2.54865 2.765625,4.132167 z" id="SvgjsPath1106" style="fill:#ffebd0;fill-opacity:1;stroke-width:1.85926"></path>
+    <circle style="fill:none;fill-opacity:1;stroke:#ffebd0;stroke-width:0.984382;stroke-dasharray:none;stroke-opacity:1" id="SvgjsCircle1105" cx="16" cy="16" r="15.50781"></circle>
+  </g>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>
