@@ -105,27 +105,38 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const { data: currentServerTime } = useSWRImmutable<string>(
     shouldFetch ? "/time/corrected" : null,
     async () => {
-      const t0a = performance.now()
-      const [r1, r2] = await Promise.all([
-        fetch(getResourceUrl("/time"), { cache: "no-store" }),
-        fetch(getResourceUrl("/time"), { cache: "no-store" })
-      ])
+      const now = new Date().toISOString()
+      console.log(`[${now}] 🕐 サーバー時刻取得開始`)
+      try {
+        const t0a = performance.now()
+        const [r1, r2] = await Promise.all([
+          fetch(getResourceUrl("/time"), { cache: "no-store" }),
+          fetch(getResourceUrl("/time"), { cache: "no-store" })
+        ])
 
-      /** 時刻レスポンスを読み込み、RTT/2で補正した受信時点のサーバー時刻を算出する */
-      const measure = async (res: Response, startPerf: number) => {
-        const text = (await res.text()).trim().replace(/^"|"$/g, "")
-        const serverMs = new Date(text).getTime()
-        const endPerf = performance.now()
-        const rtt = endPerf - startPerf
-        const correctedCurrentMs = serverMs + rtt / 2
-        return { rtt, correctedCurrentMs }
+        /** 時刻レスポンスを読み込み、RTT/2で補正した受信時点のサーバー時刻を算出する */
+        const measure = async (res: Response, startPerf: number) => {
+          const text = (await res.text()).trim().replace(/^"|"$/g, "")
+          const serverMs = new Date(text).getTime()
+          const endPerf = performance.now()
+          const rtt = endPerf - startPerf
+          const correctedCurrentMs = serverMs + rtt / 2
+          return { rtt, correctedCurrentMs }
+        }
+
+        const m1 = await measure(r1, t0a)
+        const m2Start = performance.now()
+        const m2 = await measure(r2, m2Start)
+        const best = m1.rtt <= m2.rtt ? m1 : m2
+        const result = new Date(best.correctedCurrentMs).toISOString()
+        console.log(
+          `[${new Date().toISOString()}] ✓ サーバー時刻取得完了 | RTT: ${best.rtt.toFixed(1)}ms`
+        )
+        return result
+      } catch (error) {
+        console.error(`[${new Date().toISOString()}] ✗ サーバー時刻取得失敗`, error)
+        throw error
       }
-
-      const m1 = await measure(r1, t0a)
-      const m2Start = performance.now()
-      const m2 = await measure(r2, m2Start)
-      const best = m1.rtt <= m2.rtt ? m1 : m2
-      return new Date(best.correctedCurrentMs).toISOString()
     }
   )
 
@@ -133,13 +144,26 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const { data: profile } = useSWRImmutable<Profile>(
     shouldFetch ? "/profile" : null,
     async (key: string) => {
-      const url = new URL(getResourceUrl(key))
-      url.searchParams.set("origin", window.location.origin)
-      const res = await fetch(url.toString(), { cache: "no-store" })
-      if (!res.ok) {
-        throw new Error("APIフェッチに失敗しました")
+      const now = new Date().toISOString()
+      console.log(`[${now}] 👤 プロフィール取得開始`)
+      try {
+        const startTime = performance.now()
+        const url = new URL(getResourceUrl(key))
+        url.searchParams.set("origin", window.location.origin)
+        const res = await fetch(url.toString(), { cache: "no-store" })
+        if (!res.ok) {
+          throw new Error("APIフェッチに失敗しました")
+        }
+        const data = (await res.json()) as Profile
+        const duration = performance.now() - startTime
+        console.log(
+          `[${new Date().toISOString()}] ✓ プロフィール取得完了 (${duration.toFixed(1)}ms)`
+        )
+        return data
+      } catch (error) {
+        console.error(`[${new Date().toISOString()}] ✗ プロフィール取得失敗`, error)
+        throw error
       }
-      return res.json() as Promise<Profile>
     }
   )
 
@@ -147,11 +171,24 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const { data: basicInfo } = useSWRImmutable<BasicInfo>(
     shouldFetch ? "/" : null,
     async (key: string) => {
-      const res = await fetch(getResourceUrl(key), { cache: "no-store" })
-      if (!res.ok) {
-        throw new Error("APIフェッチに失敗しました")
+      const now = new Date().toISOString()
+      console.log(`[${now}] 📋 基本情報取得開始`)
+      try {
+        const startTime = performance.now()
+        const res = await fetch(getResourceUrl(key), { cache: "no-store" })
+        if (!res.ok) {
+          throw new Error("APIフェッチに失敗しました")
+        }
+        const data = (await res.json()) as BasicInfo
+        const duration = performance.now() - startTime
+        console.log(
+          `[${new Date().toISOString()}] ✓ 基本情報取得完了 (${duration.toFixed(1)}ms) | 作品数: ${data.works.length}, Inspired By: ${data.inspiredBy.length}, BGM: ${data.bgm.length}`
+        )
+        return data
+      } catch (error) {
+        console.error(`[${new Date().toISOString()}] ✗ 基本情報取得失敗`, error)
+        throw error
       }
-      return res.json() as Promise<BasicInfo>
     }
   )
 
@@ -191,28 +228,49 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   /** 単一メディア（画像）取得処理が成功・失敗を問わず終了したことを記録し、次フレームでバッチ反映をスケジュールする */
   const markMediaFetchCompleted = useCallback(() => {
     progressRef.current += 1
+    const now = new Date().toISOString()
+    console.log(`[${now}] メディアロード進捗: ${progressRef.current}/${totalMediaAssets}`)
     scheduleProgressFlush()
-  }, [scheduleProgressFlush])
+  }, [scheduleProgressFlush, totalMediaAssets])
 
   /** 指定URLの画像を取得しObjectURLを生成 （失敗時は元URLを返す） */
   const convertToObjectUrl = useCallback(
     async (url: string): Promise<string> => {
       let objectUrlOrOriginal = url
+      const startTime = performance.now()
+      const parts = url.split("/")
+      const fileName = parts.length > 0 ? parts[parts.length - 1] : url
+      const now = new Date().toISOString()
+
       try {
+        console.log(`[${now}] 📥 ロード開始: ${fileName}`)
+        const fetchStartTime = performance.now()
         const res = await fetch(getResourceUrl(url), { cache: "no-store" })
+        const fetchDuration = performance.now() - fetchStartTime
+
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`)
         }
+
+        const blobStartTime = performance.now()
         const blob = await res.blob()
+        const blobDuration = performance.now() - blobStartTime
+
         if (blob.size === 0) {
           throw new Error("Empty blob received")
         }
+
         objectUrlOrOriginal = URL.createObjectURL(blob)
-        const parts = url.split("/")
-        const fileName = parts.length > 0 ? parts[parts.length - 1] : url
-        console.log(`  ✓ ${fileName} → ${objectUrlOrOriginal}`)
+        const totalDuration = performance.now() - startTime
+        console.log(
+          `[${new Date().toISOString()}] ✓ ${fileName} | サイズ: ${blob.size}B | 取得: ${fetchDuration.toFixed(1)}ms | Blob処理: ${blobDuration.toFixed(1)}ms | 合計: ${totalDuration.toFixed(1)}ms`
+        )
       } catch (error) {
-        console.error(`✗ Failed to load: ${url.split("/").pop()}`, error)
+        const errorDuration = performance.now() - startTime
+        console.error(
+          `[${new Date().toISOString()}] ✗ ${fileName} のロード失敗 (${errorDuration.toFixed(1)}ms)`,
+          error
+        )
       } finally {
         markMediaFetchCompleted()
       }
@@ -225,32 +283,48 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const preloadProfileMedia = useCallback(
     async (_key: [string, Profile]): Promise<Profile> => {
       const raw = _key[1]
+      const startTime = performance.now()
+      const now = new Date().toISOString()
 
-      console.log(`🖼️  プロフィール画像プリロード開始`)
-
-      // バッジ画像をObjectURLに変換
-      const upperBadgesWithObjectUrls = await Promise.all(
-        raw.badges.upper.map(async badge => ({
-          ...badge,
-          src: await convertToObjectUrl(badge.src)
-        }))
+      console.log(
+        `[${now}] 🖼️  プロフィール画像プリロード開始 (上部バッジ: ${raw.badges.upper.length}, 下部バッジ: ${raw.badges.lower.length})`
       )
 
-      const lowerBadgesWithObjectUrls = await Promise.all(
-        raw.badges.lower.map(async badge => ({
-          ...badge,
-          src: await convertToObjectUrl(badge.src)
-        }))
-      )
+      try {
+        // バッジ画像をObjectURLに変換
+        const upperBadgesWithObjectUrls = await Promise.all(
+          raw.badges.upper.map(async badge => ({
+            ...badge,
+            src: await convertToObjectUrl(badge.src)
+          }))
+        )
 
-      console.log(`✅ プロフィール画像プリロード完了`)
+        const lowerBadgesWithObjectUrls = await Promise.all(
+          raw.badges.lower.map(async badge => ({
+            ...badge,
+            src: await convertToObjectUrl(badge.src)
+          }))
+        )
 
-      return {
-        ...raw,
-        badges: {
-          upper: upperBadgesWithObjectUrls,
-          lower: lowerBadgesWithObjectUrls
+        const duration = performance.now() - startTime
+        console.log(
+          `[${new Date().toISOString()}] ✅ プロフィール画像プリロード完了 (${duration.toFixed(1)}ms)`
+        )
+
+        return {
+          ...raw,
+          badges: {
+            upper: upperBadgesWithObjectUrls,
+            lower: lowerBadgesWithObjectUrls
+          }
         }
+      } catch (error) {
+        const duration = performance.now() - startTime
+        console.error(
+          `[${new Date().toISOString()}] ❌ プロフィール画像プリロード失敗 (${duration.toFixed(1)}ms)`,
+          error
+        )
+        throw error
       }
     },
     [convertToObjectUrl]
@@ -263,6 +337,8 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
     }
 
     // データフェッチが始まったら進捗をリセット
+    const now = new Date().toISOString()
+    console.log(`[${now}] 🔄 メディアロード進捗をリセット`)
     progressRef.current = 0
     setLoadedMediaAssets(0)
   }, [profile, basicInfo])
@@ -271,39 +347,70 @@ export const useDataFetch = (shouldFetch: boolean = true) => {
   const preloadPortfolioMedia = useCallback(
     async (_key: [string, BasicInfo]): Promise<BasicInfo> => {
       const raw = _key[1]
+      const startTime = performance.now()
+      const now = new Date().toISOString()
 
-      console.log(`🖼️  基本情報画像プリロード開始`)
-
-      const worksWithObjectUrls = await Promise.all(
-        raw.works.map(async work => ({
-          ...work,
-          thumbnail: await convertToObjectUrl(work.thumbnail),
-          logo: await convertToObjectUrl(work.logo)
-        }))
+      console.log(
+        `[${now}] 🖼️  基本情報画像プリロード開始 (作品: ${raw.works.length}, Inspired By: ${raw.inspiredBy.length}, BGM: ${raw.bgm.length})`
       )
 
-      const inspiredByWithObjectUrls = await Promise.all(
-        raw.inspiredBy.map(async item => ({
-          ...item,
-          icon: await convertToObjectUrl(item.icon)
-        }))
-      )
+      try {
+        const worksStartTime = performance.now()
+        const worksWithObjectUrls = await Promise.all(
+          raw.works.map(async work => ({
+            ...work,
+            thumbnail: await convertToObjectUrl(work.thumbnail),
+            logo: await convertToObjectUrl(work.logo)
+          }))
+        )
+        const worksDuration = performance.now() - worksStartTime
+        console.log(
+          `[${new Date().toISOString()}] 📦 作品画像ロード完了: ${worksDuration.toFixed(1)}ms`
+        )
 
-      const bgmWithObjectUrls = await Promise.all(
-        raw.bgm.map(async track => ({
-          ...track,
-          artwork: await convertToObjectUrl(track.artwork)
-        }))
-      )
+        const inspiredStartTime = performance.now()
+        const inspiredByWithObjectUrls = await Promise.all(
+          raw.inspiredBy.map(async item => ({
+            ...item,
+            icon: await convertToObjectUrl(item.icon)
+          }))
+        )
+        const inspiredDuration = performance.now() - inspiredStartTime
+        console.log(
+          `[${new Date().toISOString()}] 📦 Inspired By画像ロード完了: ${inspiredDuration.toFixed(1)}ms`
+        )
 
-      const processed: BasicInfo = {
-        ...raw,
-        works: worksWithObjectUrls,
-        inspiredBy: inspiredByWithObjectUrls,
-        bgm: bgmWithObjectUrls
+        const bgmStartTime = performance.now()
+        const bgmWithObjectUrls = await Promise.all(
+          raw.bgm.map(async track => ({
+            ...track,
+            artwork: await convertToObjectUrl(track.artwork)
+          }))
+        )
+        const bgmDuration = performance.now() - bgmStartTime
+        console.log(
+          `[${new Date().toISOString()}] 📦 BGM画像ロード完了: ${bgmDuration.toFixed(1)}ms`
+        )
+
+        const processed: BasicInfo = {
+          ...raw,
+          works: worksWithObjectUrls,
+          inspiredBy: inspiredByWithObjectUrls,
+          bgm: bgmWithObjectUrls
+        }
+        const totalDuration = performance.now() - startTime
+        console.log(
+          `[${new Date().toISOString()}] ✅ 基本情報画像プリロード完了 (合計: ${totalDuration.toFixed(1)}ms)`
+        )
+        return processed
+      } catch (error) {
+        const duration = performance.now() - startTime
+        console.error(
+          `[${new Date().toISOString()}] ❌ 基本情報画像プリロード失敗 (${duration.toFixed(1)}ms)`,
+          error
+        )
+        throw error
       }
-      console.log(`✅ 基本情報画像プリロード完了`)
-      return processed
     },
     [convertToObjectUrl]
   )
