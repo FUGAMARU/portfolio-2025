@@ -68,7 +68,7 @@ export const PushSqueezeButton = ({ onClick, disabled = false, className, childr
   return (
     <button
       className={clsx(styles.pushSqueezeButton, className)}
-      data-pressed={!disabled && isPressed ? "true" : "false"}
+      data-pressed={isPressed ? "true" : "false"}
       disabled={disabled}
       onClick={onClick}
       onMouseDown={handlePressStart}

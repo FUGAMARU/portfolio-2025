@@ -4,12 +4,8 @@
   transform: var(--base-transform);
   transition: transform 0.1s ease-in-out;
 
-  &:disabled {
-    transform: var(--base-transform); /* 明示的にscale解除 */
-  }
-
   &:not(:disabled):active,
-  &:not(:disabled)[data-pressed="true"] {
+  &[data-pressed="true"] {
     transform: var(--base-transform) scale(0.95);
   }
 }
