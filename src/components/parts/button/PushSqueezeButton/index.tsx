@@ -18,7 +18,7 @@ export type Props = Pick<ComponentProps<"button">, "onClick" | "disabled" | "cla
 export const PushSqueezeButton = ({ onClick, disabled = false, className, children }: Props) => {
   const [isPressed, setIsPressed] = useState(false)
   const pressStartTimeRef = useRef(0)
-  const releaseTimerRef = useRef<number>(null)
+  const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   /** 押下開始 */
   const handlePressStart = () => {
