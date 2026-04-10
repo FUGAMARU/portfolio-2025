@@ -9,6 +9,11 @@
  * @returns URL
  */
 export const getResourceUrl = (relativePath: string): string => {
-  const apiOrigin = process.env.VITE_API_ORIGIN ?? import.meta.env.VITE_API_ORIGIN
+  const processEnvApiOrigin = (
+    (globalThis as Record<string, unknown>).process as
+      | Record<"env", Record<string, string | undefined>>
+      | undefined
+  )?.env.VITE_API_ORIGIN
+  const apiOrigin = processEnvApiOrigin ?? import.meta.env.VITE_API_ORIGIN
   return new URL(relativePath, apiOrigin).href
 }
